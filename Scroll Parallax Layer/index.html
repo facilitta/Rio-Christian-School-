@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rio Christian School</title>
+<link rel="icon" type="image/png" href="assets/logo-seal.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html.lenis{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto}
+body{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:#0f0f0f;
+  color:#efeeec;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block}
+
+/* ---------- navbar flutuante ---------- */
+.nav{
+  position:fixed;top:clamp(12px,2.5vh,24px);left:0;right:0;z-index:50;
+  display:flex;justify-content:center;
+  padding-inline:16px;
+  pointer-events:none; /* só a pílula interna recebe clique, não a faixa inteira */
+}
+.nav-pill{
+  pointer-events:auto;
+  width:100%;max-width:1180px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;padding:10px 14px 10px 18px;
+  border-radius:999px;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 10px 30px -8px rgba(0,0,0,.25);
+}
+.nav-brand{display:flex;align-items:center;gap:10px;color:#141414;text-decoration:none;font-size:.9rem;font-weight:600;letter-spacing:.01em}
+.nav-brand .icon-wa{width:22px;height:22px;flex:none}
+.nav-logo img{width:30px;height:30px;display:block}
+
+/* ---------- parallax (Osmo) ---------- */
+.parallax{position:relative}
+.parallax__header{
+  z-index:2;position:relative;height:100vh;overflow:hidden;
+}
+.parallax__visuals{position:absolute;inset:0}
+.parallax__black-line-overflow{
+  position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#0f0f0f;z-index:3;
+}
+.parallax__layers{position:absolute;inset:0;overflow:hidden}
+.parallax__layer-img{
+  position:absolute;left:0;right:0;top:-10%;
+  width:100%;height:110%;object-fit:cover;object-position:center bottom;
+  will-change:transform;
+}
+.parallax__layer-title{
+  position:absolute;inset:0;
+  display:flex;justify-content:center;align-items:center;
+  will-change:transform;
+}
+.parallax__title{
+  /* mesma letra usada em "Contate-nos" no footer */
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-weight:900;
+  font-size:clamp(2rem,8.2vw,9rem);
+  line-height:1;letter-spacing:-.03em;
+  /* transform (não margin) para deslocar 1:1 sem interferir na centralização flex;
+     sobe o suficiente para ficar acima da cabeça dos alunos */
+  transform:translateY(-24vh);
+  color:#fff;text-align:center;white-space:nowrap;
+  text-shadow:0 2px 24px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.06);
+}
+.parallax__fade{
+  position:absolute;left:0;right:0;bottom:0;height:20%;z-index:2;pointer-events:none;
+  background:linear-gradient(to top,#0f0f0f,rgba(15,15,15,0));
+}
+
+/* ---------- content (Osmo) ---------- */
+/* oculta a sessão do ícone Osmo: o scroll deve ser único, sem essa pausa/seção extra */
+.parallax__content{
+  display:none;
+  justify-content:center;align-items:center;
+  min-height:100vh;background:#0f0f0f;color:#efeeec;
+}
+.osmo-icon-svg{width:100px}
+
+/* ================= Cinematic Footer ================= */
+.footer-curtain{
+  /* bem mais alto que 100vh: cria um scroll longo e único, com espaço
+     preto antes do conteúdo começar a aparecer aos poucos */
+  position:relative;height:240vh;width:100%;
+  clip-path:polygon(0% 0,100% 0%,100% 100%,0 100%);
+}
+.cine-footer{
+  position:fixed;bottom:0;left:0;
+  display:flex;flex-direction:column;justify-content:space-between;
+  height:100vh;width:100%;overflow:hidden;
+  /* sem fundo próprio: aproveita o preto (#0f0f0f) que já vem do body,
+     continuação do primeiro scroll do parallax, para parecer um scroll único */
+  background:transparent;color:#fff;
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+
+@keyframes footer-breathe{
+  0%{transform:translate(-50%,-50%) scale(1);opacity:.6}
+  100%{transform:translate(-50%,-50%) scale(1.1);opacity:1}
+}
+@keyframes footer-marquee{ to{ transform:translateX(-50%); } }
+
+.footer-aurora{
+  position:absolute;left:50%;top:50%;
+  width:80vw;height:60vh;
+  transform:translate(-50%,-50%);
+  border-radius:50%;filter:blur(80px);
+  background:radial-gradient(circle at 50% 50%, rgba(210,35,42,.16) 0%, rgba(210,35,42,.06) 40%, transparent 70%);
+  animation:footer-breathe 8s ease-in-out infinite alternate;
+  pointer-events:none;z-index:0;
+}
+.footer-grid{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-size:60px 60px;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,.04) 1px, transparent 1px);
+  -webkit-mask-image:linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
+  mask-image:linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
+}
+
+.footer-giant-logo{
+  position:absolute;left:50%;bottom:0;
+  width:clamp(200px,20vw,360px);height:auto;
+  /* desce metade da própria altura: fica cortada ao meio pela borda de baixo */
+  transform:translate(-50%,50%);
+  opacity:.1;z-index:0;pointer-events:none;user-select:none;
+  -webkit-mask-image:radial-gradient(circle, black 40%, transparent 75%);
+  mask-image:radial-gradient(circle, black 40%, transparent 75%);
+}
+
+.footer-marquee-wrap{
+  display:none; /* texto girando removido a pedido — mantido o fundo (aurora + grade) */
+  position:absolute;top:48px;left:0;width:100%;overflow:hidden;
+  border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1);
+  background:rgba(0,0,0,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  padding-block:16px;z-index:10;
+  transform:rotate(-2deg) scale(1.1);
+  box-shadow:0 25px 50px -12px rgba(0,0,0,.6);
+}
+.footer-marquee-track{
+  display:flex;width:max-content;
+  animation:footer-marquee 40s linear infinite;
+  font-size:.75rem;font-weight:700;letter-spacing:.3em;
+  color:rgba(255,255,255,.55);text-transform:uppercase;
+}
+.footer-marquee-item{display:flex;align-items:center;gap:3rem;padding-inline:1.5rem}
+.footer-marquee-item .dot{color:rgba(210,35,42,.7);font-weight:400;letter-spacing:normal}
+
+.footer-main{
+  position:relative;z-index:10;flex:1;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding-inline:24px;margin-top:80px;width:100%;max-width:64rem;margin-inline:auto;
+}
+.footer-heading{
+  font-size:clamp(2.5rem,7vw,6rem);font-weight:900;letter-spacing:-.04em;
+  text-align:center;margin-bottom:48px;
+  color:#fff;
+}
+.footer-links{display:flex;flex-direction:column;align-items:center;gap:24px;width:100%}
+.footer-pills-row{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;width:100%}
+.footer-pill{
+  display:inline-flex;align-items:center;gap:12px;
+  padding:20px 40px;border-radius:999px;
+  font-weight:700;font-size:.95rem;color:#141414;
+  background:#fff;
+  box-shadow:0 10px 30px -10px rgba(0,0,0,.5);
+  border:1px solid rgba(255,255,255,.08);
+  transition:background .3s ease,transform .3s ease,box-shadow .3s ease;
+  cursor:pointer;text-decoration:none;will-change:transform;
+}
+.footer-pill:hover{
+  background:#f0f0f0;
+  box-shadow:0 20px 40px -10px rgba(0,0,0,.7);
+}
+.footer-pill svg{width:22px;height:22px;flex:none}
+/* fonte um pouco maior no CTA principal (sem ícone agora), com sombra interna
+   simulando luz vindo de cima (mais clara em cima, sombra sutil embaixo) */
+/* seletor composto (.footer-pill.footer-pill-cta) para garantir especificidade
+   maior que a regra genérica ".footer-pill" do media query mais abaixo */
+.footer-pill.footer-pill-cta{
+  font-size:1.15rem;
+  background:linear-gradient(180deg,#ffffff 0%,#e9e3e3 100%);
+  box-shadow:
+    0 14px 34px -12px rgba(0,0,0,.45),
+    inset 0 2px 2px rgba(255,255,255,1),
+    inset 0 -14px 20px -4px rgba(0,0,0,.22);
+  transition:font-size .3s ease,box-shadow .3s ease;
+}
+.footer-pill.footer-pill-cta:hover{
+  font-size:1.35rem;
+  box-shadow:
+    0 18px 40px -12px rgba(0,0,0,.5),
+    inset 0 2px 2px rgba(255,255,255,1),
+    inset 0 -16px 22px -4px rgba(0,0,0,.28);
+}
+@media(min-width:768px){
+  .footer-pill.footer-pill-cta{font-size:1.3rem}
+  .footer-pill.footer-pill-cta:hover{font-size:1.55rem}
+}
+.footer-pill-sm{padding:12px 24px;font-size:.8rem;font-weight:500;color:rgba(255,255,255,.55)}
+.footer-pill-sm:hover{color:#fff}
+
+.footer-secondary-row{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;width:100%;margin-top:8px}
+
+.footer-bottom{
+  position:relative;z-index:20;width:100%;padding:0 24px 32px;
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:24px;
+}
+@media(min-width:768px){.footer-bottom{flex-direction:row;padding-inline:48px}}
+.footer-rights{
+  color:rgba(255,255,255,.55);font-size:.7rem;font-weight:600;
+  letter-spacing:.15em;text-transform:uppercase;order:2;
+}
+@media(min-width:768px){.footer-rights{order:1;font-size:.75rem}}
+.footer-credit{ display:none } /* "crafted with by volvox" — removido a pedido */
+.footer-totop{
+  width:48px;height:48px;border-radius:999px;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,.55);order:3;
+  background:linear-gradient(145deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,.01) 100%);
+  box-shadow:0 10px 30px -10px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.08);cursor:pointer;
+  transition:color .3s ease;will-change:transform;
+}
+.footer-totop:hover{color:#fff}
+.footer-totop svg{width:20px;height:20px;transition:transform .3s ease}
+.footer-totop:hover svg{transform:translateY(-6px)}
+
+@media(min-width:768px){
+  .footer-pill{font-size:1rem}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-pill">
+    <a class="nav-logo" href="#" aria-label="Rio Christian School">
+      <img src="assets/logo-seal.png" alt="Rio Christian School">
+    </a>
+    <a class="nav-brand" href="https://wa.me/5521995557646" target="_blank" rel="noopener">
+      Rio Christian School
+      <svg class="icon-wa" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    </a>
+  </div>
+</header>
+
+<div class="parallax">
+  <section class="parallax__header">
+    <div class="parallax__visuals">
+      <div class="parallax__black-line-overflow"></div>
+      <div data-parallax-layers class="parallax__layers">
+        <img src="assets/parallax-room.jpg?v=8" loading="eager" data-parallax-layer="1" alt="" class="parallax__layer-img">
+        <div data-parallax-layer="3" class="parallax__layer-title">
+          <h2 class="parallax__title">Rio Christian School</h2>
+        </div>
+        <img src="assets/parallax-students.png?v=8" loading="eager" data-parallax-layer="4" alt="" class="parallax__layer-img">
+      </div>
+      <div class="parallax__fade"></div>
+    </div>
+  </section>
+  <section class="parallax__content">
+    <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 160 160" fill="none" class="osmo-icon-svg">
+      <path d="M94.8284 53.8578C92.3086 56.3776 88 54.593 88 51.0294V0H72V59.9999C72 66.6273 66.6274 71.9999 60 71.9999H0V87.9999H51.0294C54.5931 87.9999 56.3777 92.3085 53.8579 94.8283L18.3431 130.343L29.6569 141.657L65.1717 106.142C67.684 103.63 71.9745 105.396 72 108.939V160L88.0001 160L88 99.9999C88 93.3725 93.3726 87.9999 100 87.9999H160V71.9999H108.939C105.407 71.9745 103.64 67.7091 106.12 65.1938L106.142 65.1716L141.657 29.6568L130.343 18.3432L94.8284 53.8578Z" fill="currentColor"></path>
+    </svg>
+  </section>
+</div>
+
+<!-- ================= Cinematic Footer ================= -->
+<div class="footer-curtain" data-footer-curtain>
+  <footer class="cine-footer">
+
+    <div class="footer-aurora"></div>
+    <div class="footer-grid"></div>
+
+    <img class="footer-giant-logo" src="assets/logo-seal.png" alt="" data-footer-giant>
+
+    <div class="footer-marquee-wrap">
+      <div class="footer-marquee-track">
+        <div class="footer-marquee-item">
+          <span>Accountability Redefined</span><span class="dot">✦</span>
+          <span>Transparent Tracking</span><span class="dot">✦</span>
+          <span>12-Step Progress</span><span class="dot">✦</span>
+          <span>Sponsor Connection</span><span class="dot">✦</span>
+          <span>Absolute Privacy</span><span class="dot">✦</span>
+        </div>
+        <div class="footer-marquee-item">
+          <span>Accountability Redefined</span><span class="dot">✦</span>
+          <span>Transparent Tracking</span><span class="dot">✦</span>
+          <span>12-Step Progress</span><span class="dot">✦</span>
+          <span>Sponsor Connection</span><span class="dot">✦</span>
+          <span>Absolute Privacy</span><span class="dot">✦</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-main">
+      <h2 class="footer-heading" data-footer-reveal>Contate-nos</h2>
+
+      <div class="footer-links" data-footer-reveal>
+        <div class="footer-pills-row">
+          <a href="https://wa.me/5521995557646" target="_blank" rel="noopener" class="footer-pill footer-pill-cta" data-magnetic>
+            Agende sua visita
+          </a>
+
+          <a href="#" class="footer-pill" data-magnetic style="display:none">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0004.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0004.5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0222 3.503C15.5902 8.242 13.8533 7.85 12 7.85c-1.8533 0-3.5902.392-5.1369 1.1004L4.841 5.4475a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3436-4.1021-2.6893-7.5743-6.1185-9.4396"/></svg>
+            Download Android
+          </a>
+        </div>
+
+        <div class="footer-secondary-row" style="display:none">
+          <a href="#" class="footer-pill footer-pill-sm" data-magnetic>Privacy Policy</a>
+          <a href="#" class="footer-pill footer-pill-sm" data-magnetic>Terms of Service</a>
+          <a href="#" class="footer-pill footer-pill-sm" data-magnetic>Support</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-rights">© 2026 Rio Christian School. All rights reserved.</div>
+
+      <div class="footer-pill footer-credit">
+        <span>Crafted with</span> ❤ <span>by</span> <span>Volvox</span>
+      </div>
+
+      <button class="footer-totop" data-magnetic data-scroll-top aria-label="Voltar ao topo">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+      </button>
+    </div>
+
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+const triggerElement = document.querySelector('[data-parallax-layers]');
+
+if (triggerElement) {
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: triggerElement,
+      start: "0% 0%",
+      end: "100% 0%",
+      scrub: 0
+    }
+  });
+
+  const layers = [
+    { layer: "1", yPercent: 70 },
+    { layer: "2", yPercent: 55 },
+    { layer: "3", yPercent: 40 },
+    { layer: "4", yPercent: 10 }
+  ];
+
+  layers.forEach((layerObj, idx) => {
+    tl.to(
+      triggerElement.querySelectorAll(`[data-parallax-layer="${layerObj.layer}"]`),
+      {
+        yPercent: layerObj.yPercent,
+        ease: "none"
+      },
+      idx === 0 ? undefined : "<"
+    );
+  });
+}
+
+const lenis = new Lenis();
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+gsap.ticker.lagSmoothing(0);
+
+/* ================= Cinematic Footer ================= */
+const footerCurtain = document.querySelector('[data-footer-curtain]');
+
+if (footerCurtain) {
+  /* start/end em % da ALTURA DO PRÓPRIO footerCurtain (agora 240vh), não do viewport:
+     isso cria um espaço preto logo após o hero, e espalha o reveal por um scroll longo,
+     terminando bem antes do fim para sobrar uma folga de descanso no final. */
+
+  /* opacidade não entra na animação: fica sempre no valor discreto definido no CSS (marca d'água) */
+  gsap.fromTo(
+    '[data-footer-giant]',
+    { y: '10vh', scale: 0.8 },
+    {
+      y: '0vh', scale: 1, ease: 'power1.out',
+      scrollTrigger: { trigger: footerCurtain, start: '10% top', end: '45% top', scrub: 1 }
+    }
+  );
+
+  gsap.fromTo(
+    document.querySelectorAll('[data-footer-reveal]'),
+    { y: 50, opacity: 0 },
+    {
+      y: 0, opacity: 1, stagger: 0.15, ease: 'power3.out',
+      scrollTrigger: { trigger: footerCurtain, start: '22% top', end: '60% top', scrub: 1 }
+    }
+  );
+}
+
+document.querySelectorAll('[data-magnetic]').forEach((el) => {
+  el.addEventListener('mousemove', (e) => {
+    const rect = el.getBoundingClientRect();
+    const hx = rect.width / 2, hy = rect.height / 2;
+    const x = e.clientX - rect.left - hx;
+    const y = e.clientY - rect.top - hy;
+    /* movimento mais discreto: antes 0.4/0.15/scale 1.05, exagerado demais */
+    gsap.to(el, {
+      x: x * 0.15, y: y * 0.15,
+      rotationX: -y * 0.05, rotationY: x * 0.05,
+      scale: 1.02, ease: 'power2.out', duration: 0.4
+    });
+  });
+  el.addEventListener('mouseleave', () => {
+    gsap.to(el, {
+      x: 0, y: 0, rotationX: 0, rotationY: 0, scale: 1,
+      ease: 'elastic.out(1, 0.3)', duration: 1.2
+    });
+  });
+});
+
+const scrollTopBtn = document.querySelector('[data-scroll-top]');
+if (scrollTopBtn) {
+  scrollTopBtn.addEventListener('click', () => lenis.scrollTo(0));
+}
+</script>
+</body>
+</html>

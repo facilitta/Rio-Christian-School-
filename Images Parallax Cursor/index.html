@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rio Christian School</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#000;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  overflow:hidden;
+}
+img{display:block}
+
+/* container: flex w-full h-full min-h-[600px] justify-center items-center bg-black overflow-hidden */
+.preview{
+  position:relative;
+  display:flex;width:100%;height:100vh;min-height:600px;
+  justify-content:center;align-items:center;
+  background:#000;overflow:hidden;
+}
+
+/* z-50 text-center space-y-4 items-center flex flex-col */
+.center{
+  position:relative;z-index:50;
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:1rem;
+  opacity:0;transform:translateY(10px);
+  animation:fadeUp .88s ease-out 1.5s forwards;
+}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+
+/* text-5xl md:text-7xl text-white font-calendas italic */
+.title{
+  font-family:'Instrument Serif',Georgia,serif;
+  font-style:italic;font-weight:400;
+  font-size:3rem;line-height:1;color:#fff;
+}
+@media(min-width:768px){.title{font-size:4.5rem}}
+
+/* text-xs bg-white text-black rounded-full py-2 w-20 hover:scale-110 */
+.cta{
+  font-size:.75rem;line-height:1rem;
+  background:#fff;color:#000;border:none;
+  border-radius:9999px;padding:.5rem 1.25rem;
+  cursor:pointer;transition:transform .2s ease;
+  font-family:inherit;
+}
+.cta:hover{transform:scale(1.1)}
+
+/* Floating: absolute top-0 left-0 w-full h-full overflow-hidden */
+.floating{position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden}
+.floating-element{position:absolute;will-change:transform}
+.floating-element img{
+  object-fit:cover;opacity:0;
+  transition:transform .2s ease;cursor:pointer;
+}
+.floating-element img:hover{transform:scale(1.05)}
+
+/* posições e tamanhos — iguais ao demo */
+.p1{top:8%;left:11%}   .p1 img{width:4rem;height:4rem}
+.p2{top:10%;left:32%}  .p2 img{width:5rem;height:5rem}
+.p3{top:2%;left:53%}   .p3 img{width:7rem;height:10rem}
+.p4{top:0%;left:83%}   .p4 img{width:6rem;height:6rem}
+.p5{top:40%;left:2%}   .p5 img{width:7rem;height:7rem}
+.p6{top:70%;left:77%}  .p6 img{width:7rem;height:7rem}
+.p7{top:73%;left:15%}  .p7 img{width:10rem;height:100%}
+.p8{top:80%;left:50%}  .p8 img{width:6rem;height:6rem}
+
+@media(min-width:768px){
+  .p1 img{width:6rem;height:6rem}
+  .p2 img{width:7rem;height:7rem}
+  .p3 img{width:10rem;height:13rem}
+  .p4 img{width:8rem;height:8rem}
+  .p5 img{width:9rem;height:9rem}
+  .p6 img{width:9rem;height:12rem}
+  .p7 img{width:13rem;height:100%}
+  .p8 img{width:8rem;height:8rem}
+}
+</style>
+</head>
+<body>
+
+<div class="preview">
+
+  <div class="center">
+    <p class="title">Rio Christian School</p>
+    <button class="cta">Get started</button>
+  </div>
+
+  <div class="floating" data-floating>
+    <div class="floating-element p1" data-depth="0.5">
+      <img src="images/rcs1.jpg" alt="">
+    </div>
+    <div class="floating-element p2" data-depth="1">
+      <img src="images/rcs2.jpg" alt="">
+    </div>
+    <div class="floating-element p3" data-depth="2">
+      <img src="images/rcs3.jpg" alt="">
+    </div>
+    <div class="floating-element p4" data-depth="1">
+      <img src="images/rcs4.jpg" alt="">
+    </div>
+    <div class="floating-element p5" data-depth="1">
+      <img src="images/rcs5.jpg" alt="">
+    </div>
+    <div class="floating-element p6" data-depth="2">
+      <img src="images/rcs8.jpg" alt="">
+    </div>
+    <div class="floating-element p7" data-depth="4">
+      <img src="images/rcs6.jpg" alt="">
+    </div>
+    <div class="floating-element p8" data-depth="1">
+      <img src="images/rcs7.jpg" alt="">
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const SENSITIVITY = -1;
+  const EASING_FACTOR = 0.05;
+
+  const container = document.querySelector('[data-floating]');
+
+  // useMousePositionRef — posição relativa ao container
+  const mousePosition = { x: 0, y: 0 };
+  function updatePosition(x, y){
+    const rect = container.getBoundingClientRect();
+    mousePosition.x = x - rect.left;
+    mousePosition.y = y - rect.top;
+  }
+  window.addEventListener('mousemove', e => updatePosition(e.clientX, e.clientY));
+  window.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    updatePosition(t.clientX, t.clientY);
+  });
+
+  // registro dos elementos com profundidade
+  const elements = [...container.querySelectorAll('.floating-element')].map(el => ({
+    element: el,
+    depth: parseFloat(el.dataset.depth),
+    currentPosition: { x: 0, y: 0 }
+  }));
+
+  // useAnimationFrame
+  function frame(){
+    elements.forEach(data => {
+      const strength = (data.depth * SENSITIVITY) / 20;
+
+      const newTargetX = mousePosition.x * strength;
+      const newTargetY = mousePosition.y * strength;
+
+      const dx = newTargetX - data.currentPosition.x;
+      const dy = newTargetY - data.currentPosition.y;
+
+      data.currentPosition.x += dx * EASING_FACTOR;
+      data.currentPosition.y += dy * EASING_FACTOR;
+
+      data.element.style.transform =
+        `translate3d(${data.currentPosition.x}px, ${data.currentPosition.y}px, 0)`;
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // animate("img", { opacity: [0,1] }, { duration: 0.5, delay: stagger(0.15) })
+  container.querySelectorAll('img').forEach((img, i) => {
+    img.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration: 500,
+      delay: i * 150,
+      easing: 'ease-out',
+      fill: 'forwards'
+    });
+  });
+})();
+</script>
+</body>
+</html>

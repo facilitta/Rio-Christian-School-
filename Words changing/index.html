@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rio Christian School</title>
+<link rel="icon" type="image/png" href="assets/logo-seal.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ---- shadcn/ui tokens — paleta Rio Christian School ---- */
+:root{
+  --background:0 0% 100%;
+  --foreground:24 12% 10%;
+  --primary:358 71% 48%;            /* vermelho RCS #D2232A */
+  --primary-foreground:0 0% 100%;
+  --secondary:210 40% 96.1%;
+  --secondary-foreground:222.2 47.4% 11.2%;
+  --muted-foreground:25 8% 42%;
+  --accent:20 20% 96%;
+  --accent-foreground:24 12% 10%;
+  --input:24 12% 88%;
+  --radius:0.5rem;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#FAFAFB;
+  color:hsl(var(--foreground));
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- navbar flutuante (igual à do Scroll Parallax Layer, cores para fundo claro) ---------- */
+.nav{
+  position:fixed;top:clamp(12px,2.5vh,24px);left:0;right:0;z-index:50;
+  display:flex;justify-content:center;
+  padding-inline:16px;
+  pointer-events:none;
+}
+.nav-pill{
+  pointer-events:auto;
+  width:100%;max-width:1180px;min-height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;padding:10px 18px;
+  border-radius:22px; /* mais "quadradinha", cantos arredondados sem virar pílula */
+  background:#F3F4F6;
+  box-shadow:0 10px 30px -12px rgba(0,0,0,.15);
+}
+.nav-brand{display:flex;align-items:center;gap:10px;color:#1E2220;text-decoration:none;font-size:.9rem;font-weight:600;letter-spacing:.01em}
+.nav-brand .icon-wa{width:22px;height:22px;flex:none}
+.nav-logo img{width:30px;height:30px;display:block}
+
+/* w-full */
+.w-full{width:100%}
+
+/* container mx-auto */
+.container{width:100%;margin-inline:auto;padding-inline:1rem}
+@media(min-width:640px){.container{max-width:640px}}
+@media(min-width:768px){.container{max-width:768px}}
+@media(min-width:1024px){.container{max-width:1024px}}
+@media(min-width:1280px){.container{max-width:1280px}}
+@media(min-width:1536px){.container{max-width:1536px}}
+
+/* flex gap-8 items-center justify-center flex-col
+   altura natural (sem min-height:100vh) — carrossel fica logo abaixo dos
+   botões, tudo visível junto, sem precisar rolar a página */
+.hero-stack{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:clamp(1.5rem,4vh,2.75rem);
+  padding-block:clamp(8rem,18vh,11rem) clamp(1rem,3vh,2rem);
+}
+
+/* flex gap-4 flex-col
+   align-self:stretch — sem isso, o hero-stack (align-items:center) encolhe
+   este bloco para o conteúdo em fluxo normal, e a palavra rotativa (que é
+   position:absolute) não entra nessa conta, cortando a frase mais longa */
+.copy-stack{display:flex;flex-direction:column;gap:1rem;align-self:stretch}
+
+/* ---- Button (shadcn) ---- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  white-space:nowrap;border-radius:calc(var(--radius) - 2px);
+  font-size:.875rem;line-height:1.25rem;font-weight:500;
+  transition:background-color .15s ease,color .15s ease;
+  cursor:pointer;border:none;font-family:inherit;
+}
+.btn:focus-visible{outline:none;box-shadow:0 0 0 2px hsl(var(--background)),0 0 0 4px hsl(var(--foreground))}
+.btn:disabled{pointer-events:none;opacity:.5}
+
+/* cores adaptadas do script de referência (não mexe no --primary vermelho,
+   que continua servindo à palavra que muda) */
+.btn-default{background:#1C1E21;color:#fff}
+.btn-default:hover{background:#33373b}
+.btn-secondary{background:#F1EAE8;color:#1E2220}
+.btn-secondary:hover{background:#e7dcd8}
+.btn-outline{border:1px solid hsl(var(--input));background:hsl(var(--background))}
+.btn-outline:hover{background:hsl(var(--accent));color:hsl(var(--accent-foreground))}
+
+.size-default{height:2.5rem;padding:.5rem 1rem}
+.size-sm{height:2.25rem;border-radius:999px;padding-inline:.75rem}
+/* botões totalmente arredondados (pílula), como no script de referência */
+.size-lg{height:50px;border-radius:999px;padding-inline:2rem;font-size:15px;font-weight:600}
+
+.gap-4{gap:1rem}
+.gap-3{gap:.75rem}
+.icon-4{width:1rem;height:1rem;flex:none}
+.icon-wa{width:1.15rem;height:1.15rem;flex:none}
+
+/* ---- h1: tracking-tighter text-center font-regular ----
+   tamanho em clamp para caber a frase mais longa ("o futuro do seu filho") */
+.title{
+  width:100%;
+  font-size:clamp(2rem,7vw,4rem);line-height:1;
+  max-width:52rem;margin-inline:auto;letter-spacing:-.05em;
+  text-align:center;font-weight:400;
+  color:#000; /* texto fixo em preto, como no script de referência */
+}
+
+/* "badge" colorido atrás da palavra — igual ao script de referência
+   (fundo rosa/vermelho em "semear", fundo verde-limão na palavra que muda) */
+.badge-word{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:.05em .32em;border-radius:.22em;
+  font-weight:700;
+}
+.badge-pink{background:#FCDCD8;color:#C43323}
+.badge-green{background:#ECF99A;color:#3C4B13}
+
+/* relative flex w-full justify-center overflow-hidden text-center md:pb-4 md:pt-1 */
+.rotator{
+  position:relative;display:flex;width:100%;
+  justify-content:center;overflow:hidden;text-align:center;
+}
+@media(min-width:768px){.rotator{padding-bottom:1rem;padding-top:.25rem}}
+
+/* absolute font-semibold — mesmo tamanho da linha de cima ("Educar é semear");
+   badge verde-limão (igual ao "futuro" do script de referência) — só estilo,
+   a animação (transform/opacity via JS) continua exatamente igual */
+.rotator span{
+  position:absolute;font-size:1em;white-space:nowrap;
+  will-change:transform,opacity;
+}
+
+/* flex flex-row gap-3 */
+.cta-row{display:flex;flex-direction:row;gap:.75rem}
+
+/* ================= Carrossel (cards verticais, arrastável) ================= */
+.carousel-stage{
+  position:relative;width:100%;max-width:80rem;
+  height:255px;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;user-select:none;
+  margin-top:1.5rem;
+}
+@media(min-width:640px){.carousel-stage{height:355px}}
+@media(min-width:1024px){.carousel-stage{height:430px}}
+
+.carousel-drag-surface{
+  position:absolute;inset:0;z-index:50;cursor:grab;touch-action:pan-y;
+}
+.carousel-drag-surface:active{cursor:grabbing}
+
+/* cards maiores e numa proporção (4:5) que cabe melhor as fotos (todas 16:9),
+   sem inclinação — só escala/opacidade/posição x mudam */
+.carousel-card{
+  position:absolute;border-radius:1rem;overflow:hidden;
+  background:#e5e5e5;
+  width:180px;height:225px;
+  pointer-events:none;will-change:transform;
+}
+@media(min-width:640px){.carousel-card{width:260px;height:325px}}
+@media(min-width:1024px){.carousel-card{width:320px;height:400px}}
+
+.carousel-card-img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;
+  transition:transform .7s ease;
+}
+.carousel-card:hover .carousel-card-img{transform:scale(1.1)}
+
+.carousel-card-shade{position:absolute;inset:0;background:#000;pointer-events:none}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-pill">
+    <a class="nav-logo" href="#" aria-label="Rio Christian School">
+      <img src="assets/logo-seal.png" alt="Rio Christian School">
+    </a>
+    <a class="nav-brand" href="https://wa.me/5521995557646" target="_blank" rel="noopener">
+      Rio Christian School
+      <svg class="icon-wa" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    </a>
+  </div>
+</header>
+
+<div class="block">
+  <div class="w-full">
+    <div class="container">
+      <div class="hero-stack">
+
+        <div class="copy-stack">
+          <h1 class="title">
+            <span class="text-spektr-cyan-50">Educar é <span class="badge-word badge-pink">semear</span></span>
+            <span class="rotator" data-rotator>
+              &nbsp;
+              <span class="badge-word badge-green">valores</span>
+              <span class="badge-word badge-green">cuidado</span>
+              <span class="badge-word badge-green">caráter</span>
+              <span class="badge-word badge-green">sucesso</span>
+              <span class="badge-word badge-green">propósito</span>
+              <span class="badge-word badge-green">princípios</span>
+              <span class="badge-word badge-green">o futuro do seu filho</span>
+            </span>
+          </h1>
+        </div>
+
+        <div class="cta-row">
+          <button class="btn btn-default size-lg">
+            Agende sua Visita
+          </button>
+          <button class="btn btn-secondary size-lg">
+            Saiba Mais
+          </button>
+        </div>
+
+        <!-- carrossel logo abaixo dos botões, na mesma tela -->
+        <div class="carousel-stage" data-carousel-stage>
+          <div class="carousel-drag-surface" data-carousel-drag></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // transition={{ type: "spring", stiffness: 50 }} — demais valores são o padrão do framer-motion
+  const STIFFNESS = 50;
+  const DAMPING = 10;
+  const MASS = 1;
+
+  const rotator = document.querySelector('[data-rotator]');
+  const spans = [...rotator.querySelectorAll('span')];
+  const titles = spans.length;
+
+  // initial={{ opacity: 0, y: "-100" }}
+  const state = spans.map(() => ({ y: -100, vy: 0, o: 0, vo: 0 }));
+
+  let titleNumber = 0;
+
+  function targetsFor(index){
+    // animate={ titleNumber === index ? { y: 0, opacity: 1 } : { y: titleNumber > index ? -150 : 150, opacity: 0 } }
+    if (titleNumber === index) return { y: 0, o: 1 };
+    return { y: titleNumber > index ? -150 : 150, o: 0 };
+  }
+
+  function springStep(current, velocity, target, dt){
+    const acceleration = (-STIFFNESS * (current - target) - DAMPING * velocity) / MASS;
+    const newVelocity = velocity + acceleration * dt;
+    return { value: current + newVelocity * dt, velocity: newVelocity };
+  }
+
+  let lastTime = null;
+  function frame(time){
+    if (lastTime === null) lastTime = time;
+    const dt = Math.min((time - lastTime) / 1000, 1 / 30); // limita o passo em quedas de fps
+    lastTime = time;
+
+    state.forEach((s, i) => {
+      const target = targetsFor(i);
+
+      const ny = springStep(s.y, s.vy, target.y, dt);
+      s.y = ny.value; s.vy = ny.velocity;
+
+      const no = springStep(s.o, s.vo, target.o, dt);
+      s.o = no.value; s.vo = no.velocity;
+
+      spans[i].style.transform = `translateY(${s.y}px)`;
+      spans[i].style.opacity = s.o;
+    });
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // useEffect: setTimeout de 2000ms avançando o índice, voltando a 0 no fim
+  function scheduleNext(){
+    setTimeout(() => {
+      titleNumber = (titleNumber === titles - 1) ? 0 : titleNumber + 1;
+      scheduleNext();
+    }, 2000);
+  }
+  scheduleNext();
+})();
+</script>
+
+<script>
+/* ================= Carrossel (cards empilhados, arrastável) =================
+   Portado de um componente React/Framer Motion (drag + spring physics).
+   Sem texto/badge nos cards — só as fotos. */
+(function(){
+  // com scrollProgress=0, o índice 0 é o que fica centralizado (offset 0);
+  // os demais se distribuem: índice 1 e 2 à direita, índice 4 e 3 à esquerda
+  const slides = [
+    { image: "images/card-2.jpg" }, // FRAMES_1.14.1 — principal, fica no centro
+    { image: "images/card-4.jpg" },
+    { image: "images/card-5.jpg" },
+    { image: "images/card-1.jpg" },
+    { image: "images/card-3.jpg" }
+  ];
+  const total = slides.length;
+
+  const stage = document.querySelector('[data-carousel-stage]');
+  const surface = document.querySelector('[data-carousel-drag]');
+
+  const cards = slides.map((slide) => {
+    const el = document.createElement('div');
+    el.className = 'carousel-card';
+    el.innerHTML =
+      '<img class="carousel-card-img" src="' + slide.image + '" alt="" data-carousel-img>' +
+      '<div class="carousel-card-shade" data-carousel-shade></div>';
+    stage.appendChild(el);
+    return {
+      el,
+      shade: el.querySelector('[data-carousel-shade]')
+    };
+  });
+
+  // config por breakpoint — xMultiplier reduzido para os cards das pontas
+  // ficarem mais próximos (podem sobrepor um pouco os vizinhos)
+  function getConfig(width){
+    if (width < 640) return { distanceDivisor:120, velocityDivisor:500, sensitivity:180, xMultiplier:88, yMultiplier:20, rotationMultiplier:8, scaleReduction:0.06 };
+    if (width < 1024) return { distanceDivisor:160, velocityDivisor:650, sensitivity:220, xMultiplier:135, yMultiplier:30, rotationMultiplier:10, scaleReduction:0.09 };
+    return { distanceDivisor:200, velocityDivisor:800, sensitivity:250, xMultiplier:175, yMultiplier:40, rotationMultiplier:12, scaleReduction:0.12 };
+  }
+  let config = getConfig(window.innerWidth);
+  window.addEventListener('resize', () => { config = getConfig(window.innerWidth); });
+
+  // equivalente a useTransform(mv, inputRange, outputRange) — interpolação linear por trechos
+  function interpolate(value, inputRange, outputRange){
+    if (value <= inputRange[0]) return outputRange[0];
+    if (value >= inputRange[inputRange.length - 1]) return outputRange[outputRange.length - 1];
+    for (let i = 0; i < inputRange.length - 1; i++){
+      if (value >= inputRange[i] && value <= inputRange[i + 1]){
+        const t = (value - inputRange[i]) / (inputRange[i + 1] - inputRange[i]);
+        return outputRange[i] + t * (outputRange[i + 1] - outputRange[i]);
+      }
+    }
+    return outputRange[outputRange.length - 1];
+  }
+
+  let scrollProgress = 0;
+
+  // mola para o "settle" após soltar o arraste — stiffness:200, damping:30, mass:1
+  const SPRING = { stiffness:200, damping:30, mass:1 };
+  let springTarget = null;
+  let springVelocity = 0;
+
+  function updateCards(){
+    cards.forEach((card, i) => {
+      let diff = (i - scrollProgress) % total;
+      if (diff > total / 2) diff -= total;
+      if (diff < -total / 2) diff += total;
+      const offset = diff;
+      const absOffset = Math.abs(offset);
+
+      const x = offset * config.xMultiplier;
+      /* sem rotação e sem "pulo" vertical: fileira reta de cards verticais,
+         só x/escala/opacidade mudam (pedido explícito — nada de "leque") */
+      const scale = 1 - absOffset * config.scaleReduction;
+      const opacity = interpolate(offset, [-total / 2, -total / 2 + 0.5, 0, total / 2 - 0.5, total / 2], [0, 1, 1, 1, 0]);
+      const zIndex = Math.round(100 - absOffset * 10);
+      const shadeOpacity = interpolate(offset, [-2, -0.5, 0, 0.5, 2], [0.5, 0.2, 0, 0.2, 0.5]);
+
+      card.el.style.transform = `translateX(${x}px) scale(${scale})`;
+      card.el.style.opacity = opacity;
+      card.el.style.zIndex = zIndex;
+      card.shade.style.opacity = shadeOpacity;
+    });
+  }
+
+  function frame(){
+    if (springTarget !== null){
+      const dt = 1 / 60;
+      const accel = (-SPRING.stiffness * (scrollProgress - springTarget) - SPRING.damping * springVelocity) / SPRING.mass;
+      springVelocity += accel * dt;
+      scrollProgress += springVelocity * dt;
+      if (Math.abs(scrollProgress - springTarget) < 0.001 && Math.abs(springVelocity) < 0.001){
+        scrollProgress = springTarget;
+        springTarget = null;
+        springVelocity = 0;
+      }
+    }
+    updateCards();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // arraste — Pointer Events cobrem mouse e touch com a mesma lógica
+  let dragging = false;
+  let dragStartProgress = 0;
+  let lastX = 0;
+  let history = [];
+
+  surface.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    springTarget = null; springVelocity = 0;
+    dragStartProgress = scrollProgress;
+    lastX = e.clientX;
+    history = [{ x: e.clientX, t: performance.now() }];
+    surface.setPointerCapture(e.pointerId);
+  });
+
+  surface.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - lastX;
+    lastX = e.clientX;
+    scrollProgress += -dx / config.sensitivity;
+    history.push({ x: e.clientX, t: performance.now() });
+    if (history.length > 6) history.shift();
+  });
+
+  function endDrag(){
+    if (!dragging) return;
+    dragging = false;
+
+    const first = history[0];
+    const last = history[history.length - 1];
+    const totalDx = last.x - first.x;
+    const dt = (last.t - first.t) / 1000;
+    const velocity = dt > 0 ? (last.x - first.x) / dt : 0;
+
+    const distanceShift = -totalDx / config.distanceDivisor;
+    const velocityShift = -velocity / config.velocityDivisor;
+    let totalShift = Math.round(distanceShift + velocityShift);
+    totalShift = Math.max(-3, Math.min(3, totalShift));
+
+    springTarget = Math.round(dragStartProgress) + totalShift;
+    springVelocity = 0;
+  }
+
+  surface.addEventListener('pointerup', endDrag);
+  surface.addEventListener('pointercancel', endDrag);
+
+  updateCards();
+})();
+</script>
+</body>
+</html>
