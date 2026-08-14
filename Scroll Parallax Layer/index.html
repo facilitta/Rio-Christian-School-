@@ -173,13 +173,14 @@ img{display:block}
   font-weight:600;font-size:1.3rem;letter-spacing:-.03em;color:#141414;
   opacity:0;will-change:transform,opacity;
 }
-/* mesmo tratamento do botão da setinha, com sombra interna mais marcada */
+/* mesmo tratamento do botão da setinha; só o PREENCHIMENTO é vermelho
+   (#dc2929) e translúcido — borda, texto e sombra seguem neutros */
 .mhero-cta{
   display:inline-flex;align-items:center;justify-content:center;
   padding:14px 30px;border-radius:999px;text-decoration:none;
   font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
   font-weight:600;font-size:.95rem;letter-spacing:-.04em;color:#141414;
-  background:linear-gradient(145deg, rgba(20,20,20,.03) 0%, rgba(20,20,20,.01) 100%);
+  background:linear-gradient(145deg, rgba(220,41,41,.14) 0%, rgba(220,41,41,.06) 100%);
   border:1px solid rgba(20,20,20,.1);
   box-shadow:
     0 10px 30px -14px rgba(0,0,0,.35),
@@ -331,15 +332,16 @@ img{display:block}
   font-size:1.15rem;
   /* mesma letra do heading "Educar é semear princípios" */
   font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  /* só o PREENCHIMENTO é vermelho e translúcido; borda e texto seguem neutros */
   font-weight:600;letter-spacing:-.04em;color:#141414;
-  background:linear-gradient(145deg, rgba(20,20,20,.03) 0%, rgba(20,20,20,.01) 100%);
+  background:linear-gradient(145deg, rgba(220,41,41,.14) 0%, rgba(220,41,41,.06) 100%);
   border:1px solid rgba(20,20,20,.1);
   box-shadow:0 10px 30px -14px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.6);
   transition:font-size .3s ease,box-shadow .3s ease;
 }
 .footer-pill.footer-pill-cta:hover{
   font-size:1.35rem;
-  background:linear-gradient(145deg, rgba(20,20,20,.03) 0%, rgba(20,20,20,.01) 100%);
+  background:linear-gradient(145deg, rgba(220,41,41,.2) 0%, rgba(220,41,41,.09) 100%);
   box-shadow:0 14px 34px -14px rgba(0,0,0,.4), inset 0 1px 1px rgba(255,255,255,.6);
 }
 @media(min-width:768px){
