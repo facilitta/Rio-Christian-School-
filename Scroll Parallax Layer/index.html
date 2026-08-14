@@ -45,6 +45,12 @@ img{display:block}
 @media(max-width:767px){
   .nav-pill{min-height:56px;padding:8px 12px;gap:10px}
 }
+/* o backdrop-filter é caríssimo no Safari do iPhone e fica exatamente por cima
+   da área que anima; como o fundo já é 92% opaco, desligar no toque não muda
+   praticamente nada visualmente e tira um repaint pesado de cada frame */
+@media(pointer:coarse){
+  .nav-pill{backdrop-filter:none;-webkit-backdrop-filter:none}
+}
 .nav-brand-lockup{display:flex;align-items:center;gap:10px;color:#141414;text-decoration:none}
 .nav-brand-text{
   display:none;font-size:.9rem;font-weight:600;letter-spacing:.01em;
@@ -137,13 +143,17 @@ img{display:block}
      (altura = largura × 1.25), para a coluna título+imagem+frase+botão caber */
   position:relative;width:min(96%,44vh);aspect-ratio:4/5;
   overflow:hidden;flex:none;
-  will-change:clip-path;
+  /* camada própria + backface hidden: é o que estabiliza a borda arredondada
+     no Safari, que senão pisca ao re-rasterizar o clip-path a cada frame */
+  will-change:clip-path,transform;
+  -webkit-backface-visibility:hidden;backface-visibility:hidden;
   clip-path:inset(45% 45% 45% 45% round 1000px);
 }
 .mhero-media{
   position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;transform:scale(.9);
+  object-fit:cover;transform:translate3d(0,0,0) scale(.9);
   will-change:transform;
+  -webkit-backface-visibility:hidden;backface-visibility:hidden;
 }
 .mhero-side{display:none}
 
@@ -185,8 +195,16 @@ img{display:block}
   .mhero-sticky{padding:calc(clamp(12px,2.5vh,24px) + 78px + 16px) 0 24px;gap:30px}
   .mhero-title{font-size:clamp(2.6rem,5.5vw,4.5rem)}
 
-  .mhero-gallery{cursor:grab;overflow:hidden}
+  /* recorta só na horizontal (para o loop) e deixa a vertical livre, senão o
+     salto do dominó bate no limite da caixa e as fotos aparecem cortadas.
+     "clip" é o que permite manter o outro eixo visible — com "hidden" o
+     navegador força o eixo vizinho a auto e o corte volta */
+  .mhero-gallery{cursor:grab;overflow-x:clip;overflow-y:visible}
   .mhero-gallery.dragging{cursor:grabbing}
+
+  /* respiro entre o título e as fotos */
+  .mhero-title{margin-top:-7px}
+  .mhero-gallery{margin-top:7px}
   .mhero-track{width:max-content;gap:7px;will-change:transform}
 
   /* todas exatamente do mesmo tamanho e quadradas no fim; o arredondamento
@@ -393,19 +411,19 @@ img{display:block}
         <!-- dois conjuntos idênticos: o deslize lento em loop "dá a volta"
              trocando um conjunto pelo outro sem emenda visível -->
         <div class="mhero-track" data-mhero-track>
-          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-1.jpg" alt="Aluna em sala de aula"></div>
-          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-2.jpg" alt="Alunos em atividade"></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" loading="lazy" decoding="async" src="assets/side-1.jpg" alt="Aluna em sala de aula"></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" loading="lazy" decoding="async" src="assets/side-2.jpg" alt="Alunos em atividade"></div>
           <div class="mhero-inset" data-mhero-inset>
             <img class="mhero-media" src="assets/mobile-hero.jpg" alt="Aluno da Rio Christian School">
           </div>
-          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-3.jpg" alt="Alunos no refeitório"></div>
-          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-4.jpg" alt="Aluno sorrindo"></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" loading="lazy" decoding="async" src="assets/side-3.jpg" alt="Alunos no refeitório"></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" loading="lazy" decoding="async" src="assets/side-4.jpg" alt="Aluno sorrindo"></div>
 
-          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-1.jpg" alt=""></div>
-          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-2.jpg" alt=""></div>
-          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/mobile-hero.jpg" alt=""></div>
-          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-3.jpg" alt=""></div>
-          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-4.jpg" alt=""></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" loading="lazy" decoding="async" src="assets/side-1.jpg" alt=""></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" loading="lazy" decoding="async" src="assets/side-2.jpg" alt=""></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" loading="lazy" decoding="async" src="assets/mobile-hero.jpg" alt=""></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" loading="lazy" decoding="async" src="assets/side-3.jpg" alt=""></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" loading="lazy" decoding="async" src="assets/side-4.jpg" alt=""></div>
         </div>
       </div>
 
@@ -530,6 +548,11 @@ function initMhero(opts){
   let lastP = 0;
   let baseOffset = 0;       // desloca o trilho para centralizar a imagem do meio
   let loopW = 0;            // largura de um conjunto → passo do loop infinito
+  let lastClip = '';        // evita reescrever o clip-path com o mesmo valor
+
+  /* em telas de toque o blur animado é caro demais (principalmente no Safari
+     do iPhone) e faz a animação engasgar — ali o texto entra só deslizando */
+  const NO_BLUR = window.matchMedia('(pointer: coarse)').matches;
 
   const clamp01 = (v) => Math.min(Math.max(v, 0), 1);
   /* easeOutBack: passa de 1 e volta — é o que dá o "salto" do dominó */
@@ -640,7 +663,7 @@ function initMhero(opts){
       const fi = el.firstElementChild;
       fi.style.opacity = ti;
       fi.style.transform = `translateX(${-10 * (1 - ti)}px)`;
-      fi.style.filter = `blur(${5 * (1 - ti)}px)`;
+      fi.style.filter = NO_BLUR ? 'none' : `blur(${5 * (1 - ti)}px)`;
     });
   }
 
@@ -722,10 +745,17 @@ function initMhero(opts){
     lastP = p;
 
     const rp = clamp01(p / 0.72);
-    media.style.transform = `scale(${0.9 + 0.1 * rp})`;
-    const ins = 45 - 45 * rp;
-    const rad = 1000 - (1000 - finalRad) * rp;
-    inset.style.clipPath = `inset(${ins}% ${ins}% ${ins}% ${ins}% round ${rad}px)`;
+    /* translate3d força camada própria: no Safari o clip-path animado
+       re-rasteriza a cada frame e sem isso a borda arredondada pisca */
+    const sc = Math.round((0.9 + 0.1 * rp) * 1000) / 1000;
+    media.style.transform = `translate3d(0,0,0) scale(${sc})`;
+
+    /* valores quantizados (0,25% e 1px): sem isso cada frame gera uma string
+       diferente e o navegador rasteriza um recorte novo toda vez */
+    const ins = Math.round((45 - 45 * rp) * 4) / 4;
+    const rad = Math.round(1000 - (1000 - finalRad) * rp);
+    const clip = `inset(${ins}% ${ins}% ${ins}% ${ins}% round ${rad}px)`;
+    if (clip !== lastClip) { inset.style.clipPath = clip; lastClip = clip; }
 
     /* wide: as imagens laterais saem de trás da central e caem em dominó —
        cada uma salta (hop + overshoot) na sua vez, do centro para as pontas */
@@ -775,11 +805,11 @@ function initMhero(opts){
   function renderIntro(){
     const t = intro.t;
     title.style.opacity = t;
-    title.style.filter = t < 1 ? `blur(${9 * (1 - t)}px)` : 'none';
+    title.style.filter = (NO_BLUR || t >= 1) ? 'none' : `blur(${9 * (1 - t)}px)`;
     inset.style.opacity = t;
     /* transform livre aqui: o clip-path é quem desenha a pastilha, e o
        scale da foto mora em .mhero-media — nada colide */
-    inset.style.transform = `scale(${0.84 + 0.16 * t})`;
+    inset.style.transform = `translate3d(0,0,0) scale(${0.84 + 0.16 * t})`;
   }
 
   measure();
