@@ -40,9 +40,41 @@ img{display:block}
   /* sombra externa + sombra interna bem leve, só pra diferenciar do fundo */
   box-shadow:0 10px 30px -8px rgba(0,0,0,.25), inset 0 1px 2px rgba(0,0,0,.06), inset 0 0 0 1px rgba(0,0,0,.03);
 }
-.nav-brand{display:flex;align-items:center;gap:10px;color:#141414;text-decoration:none;font-size:.9rem;font-weight:600;letter-spacing:.01em;font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif}
-.nav-brand .icon-wa{width:22px;height:22px;flex:none}
-.nav-logo img{width:48px;height:48px;display:block}
+@media(max-width:767px){
+  .nav-pill{min-height:56px;padding:8px 12px;gap:10px}
+}
+.nav-brand-lockup{display:flex;align-items:center;gap:10px;color:#141414;text-decoration:none}
+.nav-brand-text{
+  display:none;font-size:.9rem;font-weight:600;letter-spacing:.01em;
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;white-space:nowrap;
+}
+@media(min-width:768px){.nav-brand-text{display:inline-block}}
+.nav-logo-img{width:48px;height:48px;display:block}
+@media(max-width:767px){.nav-logo-img{width:40px;height:40px}}
+
+/* ---------- fluid menu (instagram / whatsapp / youtube) ---------- */
+.fluid-menu{position:relative;width:44px;height:44px;flex:none}
+@media(max-width:767px){.fluid-menu{width:38px;height:38px}}
+.fluid-menu-trigger{
+  width:100%;height:100%;border-radius:999px;border:none;cursor:pointer;
+  background:#141414;color:#fff;position:relative;z-index:60;
+  display:flex;align-items:center;justify-content:center;
+}
+.fluid-menu-trigger svg{position:absolute;width:18px;height:18px;transition:opacity .25s ease,transform .25s ease}
+.fluid-menu-trigger .icon-close{opacity:0;transform:rotate(-90deg) scale(.6)}
+.fluid-menu[data-open="true"] .fluid-menu-trigger .icon-menu{opacity:0;transform:rotate(90deg) scale(.6)}
+.fluid-menu[data-open="true"] .fluid-menu-trigger .icon-close{opacity:1;transform:rotate(0) scale(1)}
+.fluid-menu-items{position:absolute;top:0;right:0;width:100%;height:100%}
+.fluid-menu-item{
+  position:absolute;top:0;right:0;width:44px;height:44px;border-radius:999px;
+  background:#fff;box-shadow:0 8px 20px -8px rgba(0,0,0,.45);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transform:translateY(0) scale(.6);
+  transition:transform .32s cubic-bezier(.4,0,.2,1),opacity .28s ease;
+}
+@media(max-width:767px){.fluid-menu-item{width:38px;height:38px}}
+.fluid-menu-item svg{width:19px;height:19px}
+.fluid-menu[data-open="true"] .fluid-menu-item{opacity:1;pointer-events:auto;transform:translateY(var(--ty)) scale(1)}
 
 /* ---------- parallax (Osmo) ---------- */
 .parallax{position:relative}
@@ -90,30 +122,25 @@ img{display:block}
 .mhero-sticky{
   position:sticky;top:0;left:0;height:100vh;width:100%;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:22px;padding:32px 24px;
+  gap:22px;padding:32px 0;
   background:radial-gradient(45% 45% at 50% 20%, #b91c22 0%, #7a1115 24%, #3d0a0c 48%, #0f0f0f 85%);
 }
-.mhero-copy{text-align:center;opacity:0;will-change:transform,opacity}
+.mhero-copy{text-align:center;opacity:0;will-change:transform,opacity;padding-inline:24px}
 .mhero-title{
   font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
   font-weight:700;font-size:clamp(2.1rem,9vw,2.8rem);
   color:#fff;letter-spacing:-.02em;line-height:1.05;
 }
-.mhero-sub{
-  margin-top:12px;font-size:.82rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
-  color:rgba(255,255,255,.65);max-width:26ch;margin-inline:auto;
-}
-.mhero-media{
-  display:block;width:88%;max-width:420px;aspect-ratio:16/9;
-  object-fit:cover;transform:scale(.7);
-  will-change:transform,clip-path;
+/* wrapper full-bleed: o clip-path revela do "pill" pequeno até a largura total da tela */
+.mhero-inset{
+  position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;
+  will-change:clip-path;
   clip-path:inset(45% 45% 45% 45% round 1000px);
 }
-.mhero-cta-wrap{opacity:0;will-change:transform,opacity}
-.mhero-cta{
-  display:inline-block;padding:15px 32px;border-radius:999px;
-  background:#fff;color:#141414;font-weight:700;font-size:.9rem;
-  text-decoration:none;box-shadow:0 10px 30px -10px rgba(0,0,0,.5);
+.mhero-media{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;transform:scale(.85);
+  will-change:transform;
 }
 
 /* ---------- content (Osmo) ---------- */
@@ -287,13 +314,28 @@ img{display:block}
 
 <header class="nav">
   <div class="nav-pill">
-    <a class="nav-logo" href="#" aria-label="Rio Christian School">
-      <img src="assets/logo-seal.png" alt="Rio Christian School">
+    <a class="nav-brand-lockup" href="#" aria-label="Rio Christian School">
+      <img class="nav-logo-img" src="assets/logo-seal.png" alt="Rio Christian School">
+      <span class="nav-brand-text">Rio Christian School</span>
     </a>
-    <a class="nav-brand" href="https://wa.me/5521995557646" target="_blank" rel="noopener">
-      Rio Christian School
-      <svg class="icon-wa" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-    </a>
+
+    <div class="fluid-menu" data-fluid-menu>
+      <button class="fluid-menu-trigger" data-fluid-trigger aria-label="Abrir menu de redes sociais" aria-expanded="false">
+        <svg class="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+      <div class="fluid-menu-items">
+        <a class="fluid-menu-item" style="--ty:56px" href="https://www.instagram.com/riochristianschool/" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="#E4405F"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+        <a class="fluid-menu-item" style="--ty:108px" href="https://wa.me/5521995557646" target="_blank" rel="noopener" aria-label="WhatsApp">
+          <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        </a>
+        <a class="fluid-menu-item" style="--ty:160px" href="https://www.youtube.com/@riochristianschool" target="_blank" rel="noopener" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </a>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -315,11 +357,9 @@ img{display:block}
     <div class="mhero-sticky">
       <div class="mhero-copy" data-mhero-copy>
         <h1 class="mhero-title">Rio Christian School</h1>
-        <p class="mhero-sub">Deliberately Christian · Purposely Academic · Intentionally International</p>
       </div>
-      <img class="mhero-media" data-mhero-media src="assets/mobile-hero.jpg" alt="Alunos da Rio Christian School">
-      <div class="mhero-cta-wrap" data-mhero-cta>
-        <a class="mhero-cta" href="https://wa.me/5521995557646" target="_blank" rel="noopener">Agende sua visita</a>
+      <div class="mhero-inset" data-mhero-inset>
+        <img class="mhero-media" src="assets/mobile-hero.jpg" alt="Alunos da Rio Christian School no refeitório">
       </div>
     </div>
   </section>
@@ -442,9 +482,9 @@ mm.add("(max-width: 767px)", () => {
   const mheroEl = document.querySelector('[data-mhero]');
   if (!mheroEl) return;
 
-  const media = document.querySelector('[data-mhero-media]');
+  const inset = document.querySelector('[data-mhero-inset]');
+  const media = inset.querySelector('.mhero-media');
   const copy = document.querySelector('[data-mhero-copy]');
-  const ctaWrap = document.querySelector('[data-mhero-cta]');
 
   ScrollTrigger.create({
     trigger: mheroEl,
@@ -454,23 +494,19 @@ mm.add("(max-width: 767px)", () => {
     onUpdate(self){
       const p = self.progress;
 
-      /* imagem: escala 0.7→1 e clip-path (pill → retângulo), 0→80% do scroll */
+      /* imagem: escala 0.85→1.05 (começa maior) e clip-path (pill → tela cheia,
+         sem cantos arredondados no fim), 0→80% do scroll */
       const revealP = Math.min(p / 0.8, 1);
-      const scale = 0.7 + 0.3 * revealP;
-      const inset = 45 - 45 * revealP;
-      const rounded = 1000 - (1000 - 16) * p;
+      const scale = 0.85 + 0.2 * revealP;
+      const insetPct = 45 - 45 * revealP;
+      const rounded = 1000 * (1 - p);
       media.style.transform = `scale(${scale})`;
-      media.style.clipPath = `inset(${inset}% ${inset}% ${inset}% ${inset}% round ${rounded}px)`;
+      inset.style.clipPath = `inset(${insetPct}% ${insetPct}% ${insetPct}% ${insetPct}% round ${rounded}px)`;
 
-      /* título/subtítulo: fade+slide, 20%→80% do scroll */
+      /* título: fade+slide, 20%→80% do scroll */
       const copyP = Math.max(0, Math.min((p - 0.2) / 0.6, 1));
       copy.style.opacity = copyP;
       copy.style.transform = `translateY(${80 - 80 * copyP}px)`;
-
-      /* botão: fade+slide, 0→70% do scroll */
-      const ctaP = Math.max(0, Math.min(p / 0.7, 1));
-      ctaWrap.style.opacity = ctaP;
-      ctaWrap.style.transform = `translateY(${-120 + 120 * ctaP}px)`;
     }
   });
 });
@@ -478,7 +514,7 @@ mm.add("(max-width: 767px)", () => {
 /* a imagem do hero mobile carrega de forma assíncrona; se o layout mudar
    depois que o ScrollTrigger já calculou start/end, os valores ficam
    desatualizados — força um refresh assim que ela (e a página toda) carregar */
-const mheroMediaImg = document.querySelector('[data-mhero-media]');
+const mheroMediaImg = document.querySelector('.mhero-media');
 if (mheroMediaImg && !mheroMediaImg.complete) {
   mheroMediaImg.addEventListener('load', () => ScrollTrigger.refresh());
 }
@@ -536,6 +572,25 @@ const scrollTopBtn = document.querySelector('[data-scroll-top]');
 if (scrollTopBtn) {
   scrollTopBtn.addEventListener('click', () => lenis.scrollTo(0));
 }
+
+/* ================= Fluid menu (redes sociais) ================= */
+document.querySelectorAll('[data-fluid-menu]').forEach((menu) => {
+  const trigger = menu.querySelector('[data-fluid-trigger]');
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = menu.getAttribute('data-open') === 'true';
+    menu.setAttribute('data-open', open ? 'false' : 'true');
+    trigger.setAttribute('aria-expanded', open ? 'false' : 'true');
+  });
+});
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('[data-fluid-menu][data-open="true"]').forEach((menu) => {
+    if (!menu.contains(e.target)) {
+      menu.setAttribute('data-open', 'false');
+      menu.querySelector('[data-fluid-trigger]').setAttribute('aria-expanded', 'false');
+    }
+  });
+});
 </script>
 </body>
 </html>
