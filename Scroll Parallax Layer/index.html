@@ -79,48 +79,9 @@ img{display:block}
 .fluid-menu-item svg{width:19px;height:19px}
 .fluid-menu[data-open="true"] .fluid-menu-item{opacity:1;pointer-events:auto;transform:translateY(var(--ty)) scale(1)}
 
-/* ---------- parallax (Osmo) ---------- */
-.parallax{position:relative}
-.parallax__header{
-  z-index:2;position:relative;height:100vh;overflow:hidden;
-}
-.parallax__visuals{position:absolute;inset:0}
-.parallax__black-line-overflow{
-  position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#fff;z-index:3;
-}
-.parallax__layers{position:absolute;inset:0;overflow:hidden}
-.parallax__layer-img{
-  position:absolute;left:0;right:0;top:-10%;
-  width:100%;height:110%;object-fit:cover;object-position:center bottom;
-  will-change:transform;
-}
-.parallax__layer-title{
-  position:absolute;inset:0;
-  display:flex;justify-content:center;align-items:center;
-  will-change:transform;
-}
-.parallax__title{
-  /* mesma letra usada no footer */
-  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
-  font-weight:700;
-  font-size:clamp(2rem,8.2vw,9rem);
-  line-height:1;letter-spacing:-.03em;
-  /* transform (não margin) para deslocar 1:1 sem interferir na centralização flex;
-     sobe o suficiente para ficar acima da cabeça dos alunos */
-  transform:translateY(-24vh);
-  color:#fff;text-align:center;white-space:nowrap;
-  text-shadow:0 2px 24px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.06);
-}
-.parallax__fade{
-  position:absolute;left:0;right:0;bottom:0;height:20%;z-index:2;pointer-events:none;
-  background:linear-gradient(to top,#ffffff,rgba(255,255,255,0));
-}
-
-/* ================= Hero mobile (scroll-reveal, substitui o parallax no mobile) ================= */
-.mhero{display:none}
+/* ================= Hero (scroll-reveal em todas as larguras) ================= */
+.mhero{display:block;position:relative;width:100%;height:200vh}
 @media(max-width:767px){
-  .parallax__header{display:none}
-  .mhero{display:block;position:relative;width:100%;height:200vh}
   /* no mobile a página termina no próprio hero: a frase, o botão e o
      copyright vivem dentro dele, então o rodapé longo é dispensado */
   .footer-curtain{display:none}
@@ -156,19 +117,26 @@ img{display:block}
      durante a animação sem empurrar a imagem para baixo */
   will-change:transform;
 }
+/* estado inicial da entrada automática (o JS anima até 1 ao carregar) */
+[data-mhero-title],[data-mhero-inset]{opacity:0}
 .mhero-title span{display:block;line-height:1.05}
 /* .fill é a "janela" que abre da largura 0 até a natural;
    .fi é o texto dentro dela, que desliza e desfoca ao entrar */
 .mhero-title .fill{overflow:hidden;width:0}
 .mhero-title .fill .fi{white-space:pre;opacity:0;transform:translateX(-10px);filter:blur(5px)}
 
+/* galeria: no mobile só a imagem central existe; no wide o trilho ganha as
+   laterais e vira arrastável */
+.mhero-gallery{width:100%;display:flex;justify-content:center}
+.mhero-track{display:flex;justify-content:center;align-items:center;width:100%}
+
 /* a forma final é um arco (raio = metade da largura, calculado no JS):
    topo e base semicirculares, laterais retas — como no print de referência */
 .mhero-inset{
   /* min(96%, 44vh): em telas baixas (SE etc.) limita a ALTURA da imagem
      (altura = largura × 1.25), para a coluna título+imagem+frase+botão caber */
-  position:relative;width:min(96%,44vh);margin-inline:auto;aspect-ratio:4/5;
-  overflow:hidden;
+  position:relative;width:min(96%,44vh);aspect-ratio:4/5;
+  overflow:hidden;flex:none;
   will-change:clip-path;
   clip-path:inset(45% 45% 45% 45% round 1000px);
 }
@@ -177,6 +145,7 @@ img{display:block}
   object-fit:cover;transform:scale(.9);
   will-change:transform;
 }
+.mhero-side{display:none}
 
 /* frase e botão entram em sequência (frase primeiro), cada um com sua opacidade */
 .mhero-below{
@@ -209,14 +178,29 @@ img{display:block}
   color:rgba(20,20,20,.42);
 }
 
-/* ---------- content (Osmo) ---------- */
-/* oculta a sessão do ícone Osmo: o scroll deve ser único, sem essa pausa/seção extra */
-.parallax__content{
-  display:none;
-  justify-content:center;align-items:center;
-  min-height:100vh;background:#0f0f0f;color:#efeeec;
+/* wide: mesmo hero, mas o título abre só na horizontal (sem subir/crescer) e
+   maior; a imagem central abre em uma GALERIA de arcos arrastável para os
+   lados; frase/botão/copyright ficam por conta do rodapé cinematográfico */
+@media(min-width:768px){
+  .mhero-sticky{padding:calc(clamp(12px,2.5vh,24px) + 78px + 16px) 0 24px;gap:30px}
+  .mhero-title{font-size:clamp(2.6rem,5.5vw,4.5rem)}
+
+  .mhero-gallery{cursor:grab;overflow:hidden}
+  .mhero-gallery.dragging{cursor:grabbing}
+  .mhero-track{width:max-content;gap:7px;will-change:transform}
+
+  /* todas exatamente do mesmo tamanho e quadradas no fim; o arredondamento
+     é animado no JS (arco → quadrado arredondado), igual para todas */
+  .mhero-inset,.mhero-side{width:min(26vw,44vh);aspect-ratio:1/1}
+  .mhero-side{
+    display:block;clip-path:none;opacity:0;
+    will-change:transform,opacity;
+  }
+  .mhero-side .mhero-media{transform:none}
+  .mhero-media{user-select:none;-webkit-user-drag:none}
+
+  .mhero-below,.mhero-legal{display:none}
 }
-.osmo-icon-svg{width:100px}
 
 /* ================= Cinematic Footer ================= */
 .footer-curtain{
@@ -399,28 +383,30 @@ img{display:block}
   </div>
 </header>
 
-<div class="parallax">
-  <section class="parallax__header">
-    <div class="parallax__visuals">
-      <div class="parallax__black-line-overflow"></div>
-      <div data-parallax-layers class="parallax__layers">
-        <img src="assets/parallax-room.jpg?v=8" loading="eager" data-parallax-layer="1" alt="" class="parallax__layer-img">
-        <div data-parallax-layer="3" class="parallax__layer-title">
-          <h2 class="parallax__title">Rio Christian School</h2>
-        </div>
-        <img src="assets/parallax-students.png?v=8" loading="eager" data-parallax-layer="4" alt="" class="parallax__layer-img">
-      </div>
-      <div class="parallax__fade"></div>
-    </div>
-  </section>
-  <section class="mhero" data-mhero>
+<section class="mhero" data-mhero>
     <div class="mhero-sticky">
       <h1 class="mhero-title" data-mhero-title>
         <span>R</span><span class="fill"><span class="fi">io </span></span><span>C</span><span class="fill"><span class="fi">hristian </span></span><span>S</span><span class="fill"><span class="fi">chool</span></span>
       </h1>
 
-      <div class="mhero-inset" data-mhero-inset>
-        <img class="mhero-media" src="assets/mobile-hero.jpg" alt="Aluno da Rio Christian School">
+      <div class="mhero-gallery" data-mhero-gallery>
+        <!-- dois conjuntos idênticos: o deslize lento em loop "dá a volta"
+             trocando um conjunto pelo outro sem emenda visível -->
+        <div class="mhero-track" data-mhero-track>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-1.jpg" alt="Aluna em sala de aula"></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-2.jpg" alt="Alunos em atividade"></div>
+          <div class="mhero-inset" data-mhero-inset>
+            <img class="mhero-media" src="assets/mobile-hero.jpg" alt="Aluno da Rio Christian School">
+          </div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-3.jpg" alt="Alunos no refeitório"></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-4.jpg" alt="Aluno sorrindo"></div>
+
+          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-1.jpg" alt=""></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-2.jpg" alt=""></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/mobile-hero.jpg" alt=""></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-3.jpg" alt=""></div>
+          <div class="mhero-inset mhero-side"><img class="mhero-media" src="assets/side-4.jpg" alt=""></div>
+        </div>
       </div>
 
       <div class="mhero-below" data-mhero-below>
@@ -431,12 +417,6 @@ img{display:block}
       <small class="mhero-legal" data-mhero-legal>© 2026 Rio Christian School</small>
     </div>
   </section>
-  <section class="parallax__content">
-    <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 160 160" fill="none" class="osmo-icon-svg">
-      <path d="M94.8284 53.8578C92.3086 56.3776 88 54.593 88 51.0294V0H72V59.9999C72 66.6273 66.6274 71.9999 60 71.9999H0V87.9999H51.0294C54.5931 87.9999 56.3777 92.3085 53.8579 94.8283L18.3431 130.343L29.6569 141.657L65.1717 106.142C67.684 103.63 71.9745 105.396 72 108.939V160L88.0001 160L88 99.9999C88 93.3725 93.3726 87.9999 100 87.9999H160V71.9999H108.939C105.407 71.9745 103.64 67.7091 106.12 65.1938L106.142 65.1716L141.657 29.6568L130.343 18.3432L94.8284 53.8578Z" fill="currentColor"></path>
-    </svg>
-  </section>
-</div>
 
 <!-- ================= Cinematic Footer ================= -->
 <div class="footer-curtain" data-footer-curtain>
@@ -510,42 +490,20 @@ gsap.registerPlugin(ScrollTrigger);
 
 const mm = gsap.matchMedia();
 
-/* desktop/tablet: parallax de scroll original (foto do refeitório + alunos) */
-mm.add("(min-width: 768px)", () => {
-  const triggerElement = document.querySelector('[data-parallax-layers]');
-  if (!triggerElement) return;
+/* a entrada automática toca uma vez por carregamento; se o breakpoint mudar
+   e o hero for reinicializado, ele já nasce no estado final */
+let introPlayed = false;
 
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: triggerElement,
-      start: "0% 0%",
-      end: "100% 0%",
-      scrub: 0
-    }
-  });
+/* hero com reveal de imagem no scroll (clip-path + scale), porta manual do
+   padrão "ContainerScroll/ContainerInset/HeroVideo" pra vanilla JS.
+   Roda em todas as larguras; opts controla o que muda entre elas:
+   - rise: o monograma pousa sobre a pastilha e sobe/cresce (só no mobile)
+   - below: frase/botão/copyright dentro do hero (só no mobile; no wide o
+     rodapé cinematográfico cumpre esse papel) */
+function initMhero(opts){
+  const RISE = opts.rise;
+  const HAS_BELOW = opts.below;
 
-  const layers = [
-    { layer: "1", yPercent: 70 },
-    { layer: "2", yPercent: 55 },
-    { layer: "3", yPercent: 40 },
-    { layer: "4", yPercent: 10 }
-  ];
-
-  layers.forEach((layerObj, idx) => {
-    tl.to(
-      triggerElement.querySelectorAll(`[data-parallax-layer="${layerObj.layer}"]`),
-      {
-        yPercent: layerObj.yPercent,
-        ease: "none"
-      },
-      idx === 0 ? undefined : "<"
-    );
-  });
-});
-
-/* mobile: hero com reveal de imagem no scroll (clip-path + scale),
-   porta manual do padrão "ContainerScroll/ContainerInset/HeroVideo" pra vanilla JS */
-mm.add("(max-width: 767px)", () => {
   const mheroEl = document.querySelector('[data-mhero]');
   if (!mheroEl) return;
 
@@ -555,20 +513,30 @@ mm.add("(max-width: 767px)", () => {
   const fills = [...title.querySelectorAll('.fill')];
   const below = document.querySelector('[data-mhero-below]');
   const legal = document.querySelector('[data-mhero-legal]');
+  const gallery = document.querySelector('[data-mhero-gallery]');
+  const track = document.querySelector('[data-mhero-track]');
+  const sides = [...track.querySelectorAll('.mhero-side')];
 
-  const SMALL_FS = 44;      // tamanho do monograma "RCS" parado sobre a imagem
   const START_LS = 0.22;    // letter-spacing do monograma (em), bem mais aberto
   const END_LS   = -0.02;   // letter-spacing final, o mesmo do título
   const START_W  = 800;     // monograma mais pesado…
   const END_W    = 600;     // …assentando no peso do título
-  const GAP_TO_PILL = 30;   // distância do "RCS" até o topo da pastilha
+  const GAP_TO_PILL = 30;   // distância do "RCS" até o topo da pastilha (mobile)
 
   let fullFs = parseFloat(getComputedStyle(title).fontSize);
-  let finalRad = 180;       // raio final do arco (metade da largura da moldura)
+  let smallFs = 44;         // tamanho do monograma; sem rise, fica = fullFs
+  let finalRad = 180;       // raio final: arco no mobile, quadrado no wide
   let TY = 0;               // quanto o título desce para encostar na pastilha
   let lastP = 0;
+  let baseOffset = 0;       // desloca o trilho para centralizar a imagem do meio
+  let loopW = 0;            // largura de um conjunto → passo do loop infinito
 
   const clamp01 = (v) => Math.min(Math.max(v, 0), 1);
+  /* easeOutBack: passa de 1 e volta — é o que dá o "salto" do dominó */
+  const backOut = (t) => {
+    const c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+  };
 
   function measure(){
     /* lê o tamanho-alvo direto do CSS (o inline é limpo antes); o letter-spacing
@@ -596,14 +564,57 @@ mm.add("(max-width: 767px)", () => {
     title.style.letterSpacing = prevLs;
     title.style.fontWeight = prevW;
 
-    /* a pastilha fechada é o miolo da moldura (clip-path inset de 45%),
-       então seu topo fica a 45% da altura da moldura */
-    const boxH = inset.offsetHeight;
-    const flexGap = parseFloat(getComputedStyle(title.parentElement).rowGap) || 22;
-    TY = flexGap + boxH * 0.45 - GAP_TO_PILL;
+    /* mobile: o "RCS" pequeno desce até a pastilha fechada (o miolo da moldura,
+       clip-path inset de 45%, cujo topo fica a 45% da altura dela).
+       wide: sem subida nem crescimento — o título já nasce no lugar/tamanho. */
+    if (RISE) {
+      smallFs = 44;
+      const boxH = inset.offsetHeight;
+      const flexGap = parseFloat(getComputedStyle(title.parentElement).rowGap) || 22;
+      TY = flexGap + boxH * 0.45 - GAP_TO_PILL;
+    } else {
+      smallFs = fullFs;
+      TY = 0;
+    }
 
-    /* arco final: raio = metade da largura → topo e base semicirculares */
-    finalRad = inset.offsetWidth / 2;
+    /* mobile termina em arco (raio = metade da largura);
+       wide termina em quadrado de cantos arredondados */
+    finalRad = RISE ? inset.offsetWidth / 2 : 24;
+
+    if (!RISE) {
+      /* distâncias medidas com o trilho sem transform, para não contaminar */
+      const prevTr = track.style.transform;
+      track.style.transform = 'none';
+
+      /* o segundo conjunto é só o "rabo" do loop: fica fora do dominó, senão
+         herdaria ranks altos, nunca terminaria a animação e desalinharia os
+         gaps quando entrasse em cena pelo deslize */
+      const kids = [...track.children];
+      const setSize = kids.length / 2;
+      kids.forEach((el, idx) => { el.dataset.dup = idx >= setSize ? '1' : '0'; });
+
+      const c = inset.offsetLeft + inset.offsetWidth / 2;
+      sides.forEach((el) => {
+        el.dataset.dx = (el.offsetLeft + el.offsetWidth / 2) - c;
+      });
+      /* rank = ordem de distância → o dominó cai do centro para as pontas.
+         a distância é quantizada (passo de 20px) para os pares espelhados
+         caírem juntos, apesar de arredondamentos de layout de 1px */
+      const domino = sides.filter(el => el.dataset.dup === '0');
+      const q = (el) => Math.round(Math.abs(parseFloat(el.dataset.dx)) / 20);
+      const uniq = [...new Set(domino.map(q))].sort((a, b) => a - b);
+      domino.forEach((el) => { el.dataset.rank = uniq.indexOf(q(el)) + 1; });
+
+      /* centraliza a imagem original do meio e mede o passo do loop
+         (largura de um conjunto de 5) para o deslize dar a volta sem emenda */
+      const gRect = gallery.getBoundingClientRect();
+      const cRect = inset.getBoundingClientRect();
+      baseOffset = (gRect.left + gRect.width / 2) - (cRect.left + cRect.width / 2);
+
+      loopW = kids[setSize].offsetLeft - kids[0].offsetLeft;
+
+      track.style.transform = prevTr;
+    }
   }
 
   /* ---- título: animação própria, disparada por uma única rolagem ---- */
@@ -613,7 +624,7 @@ mm.add("(max-width: 767px)", () => {
   function renderPos(){
     const t = pos.t;
     title.style.transform = `translateY(${TY * (1 - t)}px)`;
-    title.style.fontSize = (SMALL_FS + (fullFs - SMALL_FS) * t) + 'px';
+    title.style.fontSize = (smallFs + (fullFs - smallFs) * t) + 'px';
     /* o espaçamento aberto do monograma fecha até o do título,
        e o peso extra (800) assenta no peso final (600) */
     title.style.letterSpacing = (START_LS + (END_LS - START_LS) * t) + 'em';
@@ -645,6 +656,64 @@ mm.add("(max-width: 767px)", () => {
     gsap.to(let_, { t: 0, duration: .45, ease: 'power2.inOut', onUpdate: renderLetters });
   }
 
+  /* ---- galeria arrastável (wide) ----
+     o arrasto soma no mesmo deslocamento do loop, então nunca esbarra numa
+     borda: o trilho simplesmente continua girando */
+  let autoX = 0, vel = 0, dragging = false, lastPointerX = 0, returning = false;
+  const AUTO_SPEED = 0.35;  // px por frame do deslize lento
+
+  const wrap = () => {
+    if (!loopW) return;
+    while (autoX <= -loopW) autoX += loopW;
+    while (autoX > 0) autoX -= loopW;
+  };
+
+  function onPointerDown(e){
+    if (lastP < 0.5) return;            // só depois que a galeria abriu
+    dragging = true; lastPointerX = e.clientX; vel = 0;
+    gallery.setPointerCapture(e.pointerId);
+    gallery.classList.add('dragging');
+  }
+  function onPointerMove(e){
+    if (!dragging) return;
+    const d = e.clientX - lastPointerX;
+    lastPointerX = e.clientX;
+    vel = d;
+    autoX += d; wrap();
+  }
+  function onPointerUp(){
+    if (!dragging) return;
+    dragging = false;
+    gallery.classList.remove('dragging');
+  }
+
+  function dragTick(){
+    if (returning && !dragging) {
+      /* volta ao centro suavemente — direto para zero, sem wrap: o wrap aqui
+         ficaria trocando o alvo no meio do caminho e a volta nunca assentava */
+      vel = 0;
+      autoX += (0 - autoX) * 0.10;
+      if (Math.abs(autoX) < 0.4) autoX = 0;
+    } else if (lastP > 0.5) {
+      if (dragging) {
+        vel *= 0.9;
+      } else {
+        /* inércia decaindo até voltar ao deslize lento constante */
+        vel *= 0.94;
+        autoX += vel - AUTO_SPEED;
+        wrap();
+      }
+    }
+    track.style.transform = `translateX(${baseOffset + autoX}px)`;
+  }
+  if (!RISE) {
+    gallery.addEventListener('pointerdown', onPointerDown);
+    gallery.addEventListener('pointermove', onPointerMove);
+    gallery.addEventListener('pointerup', onPointerUp);
+    gallery.addEventListener('pointercancel', onPointerUp);
+    gsap.ticker.add(dragTick);
+  }
+
   /* ---- imagem e conteúdo de baixo: presos ao scroll ---- */
   const tagline = below.querySelector('.mhero-tagline');
   const cta = below.querySelector('.mhero-cta');
@@ -658,21 +727,75 @@ mm.add("(max-width: 767px)", () => {
     const rad = 1000 - (1000 - finalRad) * rp;
     inset.style.clipPath = `inset(${ins}% ${ins}% ${ins}% ${ins}% round ${rad}px)`;
 
-    /* sequência: primeiro a frase, depois o botão (com o copyright) */
-    const tp = clamp01((p - 0.66) / 0.16);
-    tagline.style.opacity = tp;
-    tagline.style.transform = `translateY(${16 - 16 * tp}px)`;
+    /* wide: as imagens laterais saem de trás da central e caem em dominó —
+       cada uma salta (hop + overshoot) na sua vez, do centro para as pontas */
+    if (!RISE) {
+      inset.style.borderRadius = rad + 'px';
 
-    const cp = clamp01((p - 0.82) / 0.16);
-    cta.style.opacity = cp;
-    cta.style.transform = `translateY(${16 - 16 * cp}px)`;
-    legal.style.opacity = cp;
+      const s = clamp01((p - 0.30) / 0.45);
+      const STEP = 0.10;                       // defasagem entre as "peças"
+      sides.forEach((el) => {
+        /* duplicatas do loop: entram já no lugar, sem salto */
+        if (el.dataset.dup === '1') {
+          el.style.transform = 'none';
+          el.style.opacity = clamp01(s * 1.6);
+          el.style.borderRadius = rad + 'px';
+          return;
+        }
+        const rank = parseFloat(el.dataset.rank) || 1;
+        const si = clamp01((s - (rank - 1) * STEP) / (1 - STEP));
+        const e = backOut(si);                 // overshoot = o "salto"
+        const dx = parseFloat(el.dataset.dx) || 0;
+        const hop = -26 * Math.sin(Math.PI * si);
+        el.style.transform =
+          `translate(${-dx * (1 - e)}px, ${hop}px) scale(${0.7 + 0.3 * e})`;
+        el.style.opacity = clamp01(si * 1.6);
+        el.style.borderRadius = rad + 'px';
+      });
+      /* rolou de volta pro alto: a galeria volta ao centro de forma animada
+         (o retorno em si acontece no dragTick) */
+      returning = p < 0.45;
+    }
+
+    /* sequência (só no mobile): primeiro a frase, depois o botão + copyright */
+    if (HAS_BELOW) {
+      const tp = clamp01((p - 0.66) / 0.16);
+      tagline.style.opacity = tp;
+      tagline.style.transform = `translateY(${16 - 16 * tp}px)`;
+
+      const cp = clamp01((p - 0.82) / 0.16);
+      cta.style.opacity = cp;
+      cta.style.transform = `translateY(${16 - 16 * cp}px)`;
+      legal.style.opacity = cp;
+    }
+  }
+
+  /* ---- entrada automática ao abrir a página ---- */
+  const intro = { t: 0 };
+  function renderIntro(){
+    const t = intro.t;
+    title.style.opacity = t;
+    title.style.filter = t < 1 ? `blur(${9 * (1 - t)}px)` : 'none';
+    inset.style.opacity = t;
+    /* transform livre aqui: o clip-path é quem desenha a pastilha, e o
+       scale da foto mora em .mhero-media — nada colide */
+    inset.style.transform = `scale(${0.84 + 0.16 * t})`;
   }
 
   measure();
   apply(0);
   renderPos();
   renderLetters();
+
+  if (introPlayed) {
+    intro.t = 1; renderIntro();
+  } else {
+    introPlayed = true;
+    renderIntro();
+    gsap.to(intro, {
+      t: 1, duration: 1.2, delay: 0.25, ease: 'power3.out', onUpdate: renderIntro
+    });
+  }
 
   /* as larguras só são confiáveis depois que a fonte carrega */
   if (document.fonts && document.fonts.ready) {
@@ -697,10 +820,25 @@ mm.add("(max-width: 767px)", () => {
     }
   });
 
-  return () => window.removeEventListener('resize', onResize);
-});
+  return () => {
+    window.removeEventListener('resize', onResize);
+    if (!RISE) {
+      gallery.removeEventListener('pointerdown', onPointerDown);
+      gallery.removeEventListener('pointermove', onPointerMove);
+      gallery.removeEventListener('pointerup', onPointerUp);
+      gallery.removeEventListener('pointercancel', onPointerUp);
+      gsap.ticker.remove(dragTick);
+      track.style.transform = '';
+    }
+  };
+}
 
-/* a imagem do hero mobile carrega de forma assíncrona; se o layout mudar
+/* mobile: monograma pousado na pastilha, sobe/cresce, frase+botão no hero */
+mm.add("(max-width: 767px)", () => initMhero({ rise: true, below: true }));
+/* wide: título já no lugar, abrindo só na horizontal; rodapé cuida do CTA */
+mm.add("(min-width: 768px)", () => initMhero({ rise: false, below: false }));
+
+/* a imagem do hero carrega de forma assíncrona; se o layout mudar
    depois que o ScrollTrigger já calculou start/end, os valores ficam
    desatualizados — força um refresh assim que ela (e a página toda) carregar */
 const mheroMediaImg = document.querySelector('.mhero-media');
