@@ -8,7 +8,9 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<!-- Plus Jakarta Sans como fonte VARIÁVEL (200..800): o peso do "RCS" é animado
+     continuamente de 800 até 600, o que só fica suave com o eixo variável -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@200..800&display=swap" rel="stylesheet">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -84,7 +86,7 @@ img{display:block}
 }
 .parallax__visuals{position:absolute;inset:0}
 .parallax__black-line-overflow{
-  position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#0f0f0f;z-index:3;
+  position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#fff;z-index:3;
 }
 .parallax__layers{position:absolute;inset:0;overflow:hidden}
 .parallax__layer-img{
@@ -111,37 +113,100 @@ img{display:block}
 }
 .parallax__fade{
   position:absolute;left:0;right:0;bottom:0;height:20%;z-index:2;pointer-events:none;
-  background:linear-gradient(to top,#0f0f0f,rgba(15,15,15,0));
+  background:linear-gradient(to top,#ffffff,rgba(255,255,255,0));
 }
 
 /* ================= Hero mobile (scroll-reveal, substitui o parallax no mobile) ================= */
 .mhero{display:none}
 @media(max-width:767px){
   .parallax__header{display:none}
-  .mhero{display:block;position:relative;width:100%;height:220vh}
+  .mhero{display:block;position:relative;width:100%;height:200vh}
+  /* no mobile a página termina no próprio hero: a frase, o botão e o
+     copyright vivem dentro dele, então o rodapé longo é dispensado */
+  .footer-curtain{display:none}
 }
 .mhero-sticky{
   position:sticky;top:0;left:0;height:100vh;width:100%;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:22px;padding:32px 0;
-  background:radial-gradient(45% 45% at 50% 20%, #b91c22 0%, #7a1115 24%, #3d0a0c 48%, #0f0f0f 85%);
+  gap:22px;
+  /* padding-top reserva a faixa da navbar fixa (top + altura da pílula mobile):
+     em telas baixas a centralização empurraria o título para trás dela */
+  padding:calc(clamp(12px,2.5vh,24px) + 56px + 12px) 0 24px;
+  /* branco com a mesma grade cinza-clara do rodapé, para dar continuidade */
+  background-color:#fff;
+  background-image:
+    linear-gradient(to right, rgba(20,20,20,.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(20,20,20,.07) 1px, transparent 1px);
+  background-size:60px 60px;
 }
-.mhero-copy{text-align:center;opacity:0;will-change:transform,opacity;padding-inline:24px}
+/* título que começa como o monograma "RCS" e se abre em "Rio Christian School":
+   os trechos .fill ("io ", "hristian ", "chool") crescem de largura 0 até a
+   largura natural, empurrando R/C/S para os lados enquanto fazem fade in.
+   flex + align-items:flex-end alinha tudo pela base (overflow:hidden quebraria
+   o alinhamento por baseline se fosse inline-block). */
 .mhero-title{
+  display:flex;justify-content:center;align-items:flex-end;
   font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
-  font-weight:700;font-size:clamp(2.1rem,9vw,2.8rem);
-  color:#fff;letter-spacing:-.02em;line-height:1.05;
+  font-weight:600;font-size:clamp(2.1rem,9vw,2.8rem);
+  color:#141414;letter-spacing:-.02em;
+  padding-inline:24px;
+  /* fica acima da moldura da imagem, já que começa deslocado sobre ela */
+  position:relative;z-index:2;
+  /* a altura é fixada por JS no tamanho final: assim o font-size pode crescer
+     durante a animação sem empurrar a imagem para baixo */
+  will-change:transform;
 }
-/* wrapper full-bleed: o clip-path revela do "pill" pequeno até a largura total da tela */
+.mhero-title span{display:block;line-height:1.05}
+/* .fill é a "janela" que abre da largura 0 até a natural;
+   .fi é o texto dentro dela, que desliza e desfoca ao entrar */
+.mhero-title .fill{overflow:hidden;width:0}
+.mhero-title .fill .fi{white-space:pre;opacity:0;transform:translateX(-10px);filter:blur(5px)}
+
+/* a forma final é um arco (raio = metade da largura, calculado no JS):
+   topo e base semicirculares, laterais retas — como no print de referência */
 .mhero-inset{
-  position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;
+  /* min(96%, 44vh): em telas baixas (SE etc.) limita a ALTURA da imagem
+     (altura = largura × 1.25), para a coluna título+imagem+frase+botão caber */
+  position:relative;width:min(96%,44vh);margin-inline:auto;aspect-ratio:4/5;
+  overflow:hidden;
   will-change:clip-path;
   clip-path:inset(45% 45% 45% 45% round 1000px);
 }
 .mhero-media{
   position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;transform:scale(.85);
+  object-fit:cover;transform:scale(.9);
   will-change:transform;
+}
+
+/* frase e botão entram em sequência (frase primeiro), cada um com sua opacidade */
+.mhero-below{
+  display:flex;flex-direction:column;align-items:center;gap:14px;
+  text-align:center;padding-inline:24px;
+}
+.mhero-tagline{
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-weight:600;font-size:1.3rem;letter-spacing:-.03em;color:#141414;
+  opacity:0;will-change:transform,opacity;
+}
+/* mesmo tratamento do botão da setinha, com sombra interna mais marcada */
+.mhero-cta{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:14px 30px;border-radius:999px;text-decoration:none;
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-weight:600;font-size:.95rem;letter-spacing:-.04em;color:#141414;
+  background:linear-gradient(145deg, rgba(20,20,20,.03) 0%, rgba(20,20,20,.01) 100%);
+  border:1px solid rgba(20,20,20,.1);
+  box-shadow:
+    0 10px 30px -14px rgba(0,0,0,.35),
+    inset 0 2px 2px rgba(255,255,255,.9),
+    inset 0 -12px 18px -4px rgba(0,0,0,.18);
+  opacity:0;will-change:transform,opacity;
+}
+.mhero-legal{
+  position:absolute;left:0;right:0;bottom:18px;
+  text-align:center;opacity:0;
+  font-size:.6rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(20,20,20,.42);
 }
 
 /* ---------- content (Osmo) ---------- */
@@ -164,9 +229,8 @@ img{display:block}
   position:fixed;bottom:0;left:0;
   display:flex;flex-direction:column;justify-content:space-between;
   height:100vh;width:100%;overflow:hidden;
-  /* sem fundo próprio: aproveita o preto (#0f0f0f) que já vem do body,
-     continuação do primeiro scroll do parallax, para parecer um scroll único */
-  background:transparent;color:#fff;
+  /* fundo branco: a transição vem do fade branco no rodapé da imagem do hero */
+  background:#fff;color:#141414;
   font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
   -webkit-font-smoothing:antialiased;
 }
@@ -182,7 +246,9 @@ img{display:block}
   width:80vw;height:60vh;
   transform:translate(-50%,-50%);
   border-radius:50%;filter:blur(80px);
-  background:radial-gradient(circle at 50% 50%, rgba(210,35,42,.16) 0%, rgba(210,35,42,.06) 40%, transparent 70%);
+  /* bem mais sutil que na versão escura: sobre o branco, o vermelho vira
+     mancha rosada com facilidade — aqui fica só como um calor de fundo */
+  background:radial-gradient(circle at 50% 50%, rgba(210,35,42,.055) 0%, rgba(210,35,42,.022) 40%, transparent 70%);
   animation:footer-breathe 8s ease-in-out infinite alternate;
   pointer-events:none;z-index:0;
 }
@@ -190,21 +256,10 @@ img{display:block}
   position:absolute;inset:0;z-index:0;pointer-events:none;
   background-size:60px 60px;
   background-image:
-    linear-gradient(to right, rgba(255,255,255,.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,.04) 1px, transparent 1px);
+    linear-gradient(to right, rgba(20,20,20,.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(20,20,20,.07) 1px, transparent 1px);
   -webkit-mask-image:linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
   mask-image:linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
-}
-
-/* centralizada atrás do texto (dentro de .footer-main, que já centraliza
-   o heading), bem grande, funcionando como um "fundo" para a escrita */
-.footer-giant-logo{
-  position:absolute;top:50%;left:50%;
-  width:clamp(520px,60vw,920px);height:auto;
-  transform:translate(-50%,-50%);
-  opacity:.14;z-index:0;pointer-events:none;user-select:none;
-  -webkit-mask-image:radial-gradient(circle, black 40%, transparent 75%);
-  mask-image:radial-gradient(circle, black 40%, transparent 75%);
 }
 
 .footer-marquee-wrap{
@@ -231,10 +286,13 @@ img{display:block}
   padding-inline:24px;margin-top:80px;width:100%;max-width:64rem;margin-inline:auto;
 }
 .footer-heading{
-  position:relative;z-index:1; /* garante que fique acima da logo-fundo */
-  font-size:clamp(2.5rem,7vw,6rem);font-weight:700;letter-spacing:-.04em;
+  position:relative;z-index:1; /* acima da aurora e da grade */
+  /* sempre em uma única linha: tamanho preso à largura da viewport
+     (nowrap + vw) em vez de um clamp que quebraria em duas linhas */
+  font-size:min(6.6vw,4.6rem);font-weight:600;letter-spacing:-.04em;
+  white-space:nowrap;
   text-align:center;margin-bottom:48px;
-  color:#fff;
+  color:#141414;
 }
 .footer-links{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:24px;width:100%}
 .footer-pills-row{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;width:100%}
@@ -257,21 +315,22 @@ img{display:block}
    simulando luz vindo de cima (mais clara em cima, sombra sutil embaixo) */
 /* seletor composto (.footer-pill.footer-pill-cta) para garantir especificidade
    maior que a regra genérica ".footer-pill" do media query mais abaixo */
+/* mesmo tratamento do botão da setinha (.footer-totop): fundo "fantasma",
+   borda fina e sombra suave — a animação de crescer a fonte no hover é a mesma */
 .footer-pill.footer-pill-cta{
   font-size:1.15rem;
-  background:linear-gradient(180deg,#ffffff 0%,#e9e3e3 100%);
-  box-shadow:
-    0 14px 34px -12px rgba(0,0,0,.45),
-    inset 0 2px 2px rgba(255,255,255,1),
-    inset 0 -14px 20px -4px rgba(0,0,0,.22);
+  /* mesma letra do heading "Educar é semear princípios" */
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-weight:600;letter-spacing:-.04em;color:#141414;
+  background:linear-gradient(145deg, rgba(20,20,20,.03) 0%, rgba(20,20,20,.01) 100%);
+  border:1px solid rgba(20,20,20,.1);
+  box-shadow:0 10px 30px -14px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.6);
   transition:font-size .3s ease,box-shadow .3s ease;
 }
 .footer-pill.footer-pill-cta:hover{
   font-size:1.35rem;
-  box-shadow:
-    0 18px 40px -12px rgba(0,0,0,.5),
-    inset 0 2px 2px rgba(255,255,255,1),
-    inset 0 -16px 22px -4px rgba(0,0,0,.28);
+  background:linear-gradient(145deg, rgba(20,20,20,.03) 0%, rgba(20,20,20,.01) 100%);
+  box-shadow:0 14px 34px -14px rgba(0,0,0,.4), inset 0 1px 1px rgba(255,255,255,.6);
 }
 @media(min-width:768px){
   .footer-pill.footer-pill-cta{font-size:1.3rem}
@@ -288,7 +347,7 @@ img{display:block}
 }
 @media(min-width:768px){.footer-bottom{flex-direction:row;padding-inline:48px}}
 .footer-rights{
-  color:rgba(255,255,255,.55);font-size:.7rem;font-weight:600;
+  color:rgba(20,20,20,.5);font-size:.7rem;font-weight:600;
   letter-spacing:.15em;text-transform:uppercase;order:2;
 }
 @media(min-width:768px){.footer-rights{order:1;font-size:.75rem}}
@@ -296,13 +355,13 @@ img{display:block}
 .footer-totop{
   width:48px;height:48px;border-radius:999px;
   display:flex;align-items:center;justify-content:center;
-  color:rgba(255,255,255,.55);order:3;
-  background:linear-gradient(145deg, rgba(255,255,255,.03) 0%, rgba(255,255,255,.01) 100%);
-  box-shadow:0 10px 30px -10px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.1);
-  border:1px solid rgba(255,255,255,.08);cursor:pointer;
+  color:rgba(20,20,20,.5);order:3;
+  background:linear-gradient(145deg, rgba(20,20,20,.03) 0%, rgba(20,20,20,.01) 100%);
+  box-shadow:0 10px 30px -14px rgba(0,0,0,.35), inset 0 1px 1px rgba(255,255,255,.6);
+  border:1px solid rgba(20,20,20,.1);cursor:pointer;
   transition:color .3s ease;will-change:transform;
 }
-.footer-totop:hover{color:#fff}
+.footer-totop:hover{color:#141414}
 .footer-totop svg{width:20px;height:20px;transition:transform .3s ease}
 .footer-totop:hover svg{transform:translateY(-6px)}
 
@@ -356,12 +415,20 @@ img{display:block}
   </section>
   <section class="mhero" data-mhero>
     <div class="mhero-sticky">
-      <div class="mhero-copy" data-mhero-copy>
-        <h1 class="mhero-title">Rio Christian School</h1>
-      </div>
+      <h1 class="mhero-title" data-mhero-title>
+        <span>R</span><span class="fill"><span class="fi">io </span></span><span>C</span><span class="fill"><span class="fi">hristian </span></span><span>S</span><span class="fill"><span class="fi">chool</span></span>
+      </h1>
+
       <div class="mhero-inset" data-mhero-inset>
-        <img class="mhero-media" src="assets/mobile-hero.jpg" alt="Alunos da Rio Christian School no refeitório">
+        <img class="mhero-media" src="assets/mobile-hero.jpg" alt="Aluno da Rio Christian School">
       </div>
+
+      <div class="mhero-below" data-mhero-below>
+        <p class="mhero-tagline">Educar é semear princípios</p>
+        <a class="mhero-cta" href="https://wa.me/5521995557646" target="_blank" rel="noopener">Agende sua visita</a>
+      </div>
+
+      <small class="mhero-legal" data-mhero-legal>© 2026 Rio Christian School</small>
     </div>
   </section>
   <section class="parallax__content">
@@ -398,7 +465,6 @@ img{display:block}
     </div>
 
     <div class="footer-main">
-      <img class="footer-giant-logo" src="assets/logo-seal.png" alt="" data-footer-giant>
       <h2 class="footer-heading" data-footer-reveal>Educar é semear princípios</h2>
 
       <div class="footer-links" data-footer-reveal>
@@ -485,7 +551,137 @@ mm.add("(max-width: 767px)", () => {
 
   const inset = document.querySelector('[data-mhero-inset]');
   const media = inset.querySelector('.mhero-media');
-  const copy = document.querySelector('[data-mhero-copy]');
+  const title = document.querySelector('[data-mhero-title]');
+  const fills = [...title.querySelectorAll('.fill')];
+  const below = document.querySelector('[data-mhero-below]');
+  const legal = document.querySelector('[data-mhero-legal]');
+
+  const SMALL_FS = 44;      // tamanho do monograma "RCS" parado sobre a imagem
+  const START_LS = 0.22;    // letter-spacing do monograma (em), bem mais aberto
+  const END_LS   = -0.02;   // letter-spacing final, o mesmo do título
+  const START_W  = 800;     // monograma mais pesado…
+  const END_W    = 600;     // …assentando no peso do título
+  const GAP_TO_PILL = 30;   // distância do "RCS" até o topo da pastilha
+
+  let fullFs = parseFloat(getComputedStyle(title).fontSize);
+  let finalRad = 180;       // raio final do arco (metade da largura da moldura)
+  let TY = 0;               // quanto o título desce para encostar na pastilha
+  let lastP = 0;
+
+  const clamp01 = (v) => Math.min(Math.max(v, 0), 1);
+
+  function measure(){
+    /* lê o tamanho-alvo direto do CSS (o inline é limpo antes); o letter-spacing
+       também é zerado durante a medição, para as larguras saírem no estado final */
+    const prevFs = title.style.fontSize;
+    const prevLs = title.style.letterSpacing;
+    const prevW = title.style.fontWeight;
+    title.style.fontSize = '';
+    title.style.letterSpacing = '';
+    title.style.fontWeight = '';
+    fullFs = parseFloat(getComputedStyle(title).fontSize);
+
+    /* trava a altura no tamanho final: o font-size cresce sem mexer no layout */
+    title.style.height = (fullFs * 1.05) + 'px';
+
+    /* largura natural de cada trecho, guardada em em para acompanhar o font-size */
+    fills.forEach((el) => {
+      const prevW = el.style.width;
+      el.style.width = 'auto';
+      el.dataset.w = el.offsetWidth / parseFloat(getComputedStyle(el).fontSize);
+      el.style.width = prevW || '0px';
+    });
+
+    title.style.fontSize = prevFs;
+    title.style.letterSpacing = prevLs;
+    title.style.fontWeight = prevW;
+
+    /* a pastilha fechada é o miolo da moldura (clip-path inset de 45%),
+       então seu topo fica a 45% da altura da moldura */
+    const boxH = inset.offsetHeight;
+    const flexGap = parseFloat(getComputedStyle(title.parentElement).rowGap) || 22;
+    TY = flexGap + boxH * 0.45 - GAP_TO_PILL;
+
+    /* arco final: raio = metade da largura → topo e base semicirculares */
+    finalRad = inset.offsetWidth / 2;
+  }
+
+  /* ---- título: animação própria, disparada por uma única rolagem ---- */
+  const pos = { t: 0 };   // subida + tamanho + peso
+  const let_ = { t: 0 };  // abertura das letras que completam o nome
+
+  function renderPos(){
+    const t = pos.t;
+    title.style.transform = `translateY(${TY * (1 - t)}px)`;
+    title.style.fontSize = (SMALL_FS + (fullFs - SMALL_FS) * t) + 'px';
+    /* o espaçamento aberto do monograma fecha até o do título,
+       e o peso extra (800) assenta no peso final (600) */
+    title.style.letterSpacing = (START_LS + (END_LS - START_LS) * t) + 'em';
+    title.style.fontWeight = Math.round(START_W + (END_W - START_W) * t);
+  }
+
+  function renderLetters(){
+    const t = let_.t;
+    fills.forEach((el, i) => {
+      /* cascata: "io", depois "hristian", depois "chool" */
+      const ti = clamp01((t - i * 0.07) / (1 - 0.14));
+      el.style.width = (parseFloat(el.dataset.w) * ti) + 'em';
+      const fi = el.firstElementChild;
+      fi.style.opacity = ti;
+      fi.style.transform = `translateX(${-10 * (1 - ti)}px)`;
+      fi.style.filter = `blur(${5 * (1 - ti)}px)`;
+    });
+  }
+
+  let opened = false;
+  function openTitle(){
+    gsap.killTweensOf([pos, let_]);
+    gsap.to(pos,  { t: 1, duration: 1.0,  ease: 'power4.out', onUpdate: renderPos });
+    gsap.to(let_, { t: 1, duration: 1.15, delay: 0.12, ease: 'power3.out', onUpdate: renderLetters });
+  }
+  function closeTitle(){
+    gsap.killTweensOf([pos, let_]);
+    gsap.to(pos,  { t: 0, duration: .5,  ease: 'power2.inOut', onUpdate: renderPos });
+    gsap.to(let_, { t: 0, duration: .45, ease: 'power2.inOut', onUpdate: renderLetters });
+  }
+
+  /* ---- imagem e conteúdo de baixo: presos ao scroll ---- */
+  const tagline = below.querySelector('.mhero-tagline');
+  const cta = below.querySelector('.mhero-cta');
+
+  function apply(p){
+    lastP = p;
+
+    const rp = clamp01(p / 0.72);
+    media.style.transform = `scale(${0.9 + 0.1 * rp})`;
+    const ins = 45 - 45 * rp;
+    const rad = 1000 - (1000 - finalRad) * rp;
+    inset.style.clipPath = `inset(${ins}% ${ins}% ${ins}% ${ins}% round ${rad}px)`;
+
+    /* sequência: primeiro a frase, depois o botão (com o copyright) */
+    const tp = clamp01((p - 0.66) / 0.16);
+    tagline.style.opacity = tp;
+    tagline.style.transform = `translateY(${16 - 16 * tp}px)`;
+
+    const cp = clamp01((p - 0.82) / 0.16);
+    cta.style.opacity = cp;
+    cta.style.transform = `translateY(${16 - 16 * cp}px)`;
+    legal.style.opacity = cp;
+  }
+
+  measure();
+  apply(0);
+  renderPos();
+  renderLetters();
+
+  /* as larguras só são confiáveis depois que a fonte carrega */
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      measure(); apply(lastP); renderPos(); renderLetters(); ScrollTrigger.refresh();
+    });
+  }
+  const onResize = () => { measure(); apply(lastP); renderPos(); renderLetters(); };
+  window.addEventListener('resize', onResize);
 
   ScrollTrigger.create({
     trigger: mheroEl,
@@ -493,23 +689,15 @@ mm.add("(max-width: 767px)", () => {
     end: 'bottom bottom',
     scrub: true,
     onUpdate(self){
-      const p = self.progress;
-
-      /* imagem: escala 0.85→1.05 (começa maior) e clip-path (pill → tela cheia,
-         sem cantos arredondados no fim), 0→80% do scroll */
-      const revealP = Math.min(p / 0.8, 1);
-      const scale = 0.85 + 0.2 * revealP;
-      const insetPct = 45 - 45 * revealP;
-      const rounded = 1000 * (1 - p);
-      media.style.transform = `scale(${scale})`;
-      inset.style.clipPath = `inset(${insetPct}% ${insetPct}% ${insetPct}% ${insetPct}% round ${rounded}px)`;
-
-      /* título: fade+slide, 20%→80% do scroll */
-      const copyP = Math.max(0, Math.min((p - 0.2) / 0.6, 1));
-      copy.style.opacity = copyP;
-      copy.style.transform = `translateY(${80 - 80 * copyP}px)`;
+      apply(self.progress);
+      /* a abertura do título não é progressiva: basta começar a rolar que ela
+         roda inteira sozinha; voltar ao topo rearma para poder ver de novo */
+      if (!opened && self.progress > 0.012){ opened = true; openTitle(); }
+      else if (opened && self.progress < 0.004){ opened = false; closeTitle(); }
     }
   });
+
+  return () => window.removeEventListener('resize', onResize);
 });
 
 /* a imagem do hero mobile carrega de forma assíncrona; se o layout mudar
@@ -529,15 +717,13 @@ gsap.ticker.lagSmoothing(0);
 /* ================= Cinematic Footer ================= */
 const footerCurtain = document.querySelector('[data-footer-curtain]');
 
-if (footerCurtain) {
-  /* start/end em % da ALTURA DO PRÓPRIO footerCurtain (agora 240vh), não do viewport:
-     isso cria um espaço preto logo após o hero, e espalha o reveal por um scroll longo,
-     terminando bem antes do fim para sobrar uma folga de descanso no final. */
+/* só no desktop: no mobile o rodapé é ocultado e seu conteúdo vive dentro do hero */
+mm.add("(min-width: 768px)", () => {
+  if (!footerCurtain) return;
 
-  /* a logo-fundo agora fica parada, centralizada via CSS (translate -50%/-50%);
-     animá-la aqui conflitava com essa centralização, pois o GSAP assume
-     controle total do eixo Y ao tocar em "y". */
-
+  /* start/end em % da ALTURA DO PRÓPRIO footerCurtain (240vh), não do viewport:
+     espalha o reveal por um scroll longo, terminando antes do fim para sobrar
+     uma folga de descanso no final. */
   gsap.fromTo(
     document.querySelectorAll('[data-footer-reveal]'),
     { y: 50, opacity: 0 },
@@ -546,7 +732,7 @@ if (footerCurtain) {
       scrollTrigger: { trigger: footerCurtain, start: '22% top', end: '60% top', scrub: 1 }
     }
   );
-}
+});
 
 document.querySelectorAll('[data-magnetic]').forEach((el) => {
   el.addEventListener('mousemove', (e) => {
