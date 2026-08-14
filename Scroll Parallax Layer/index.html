@@ -88,6 +88,9 @@ img{display:block}
 /* ================= Hero (scroll-reveal em todas as larguras) ================= */
 .mhero{display:block;position:relative;width:100%;height:200vh}
 @media(max-width:767px){
+  /* como tudo abre de uma vez na primeira rolagem, não é preciso um trecho
+     longo de scroll só para a animação acontecer */
+  .mhero{height:140vh}
   /* no mobile a página termina no próprio hero: a frase, o botão e o
      copyright vivem dentro dele, então o rodapé longo é dispensado */
   .footer-curtain{display:none}
@@ -136,22 +139,23 @@ img{display:block}
 .mhero-gallery{width:100%;display:flex;justify-content:center}
 .mhero-track{display:flex;justify-content:center;align-items:center;width:100%}
 
-/* a forma final é um arco (raio = metade da largura, calculado no JS):
-   topo e base semicirculares, laterais retas — como no print de referência */
+/* A janela abre por ESCALA, não por clip-path: a moldura cresce de 0.1 até 1
+   e a foto recebe a escala inversa, então ela aparenta ficar parada no tamanho
+   real enquanto a "janela" se abre em volta. Tudo transform = composto na GPU,
+   sem repaint — que era o que fazia a borda piscar no Safari do iPhone.
+   O arredondamento vem de border-radius (que escala junto), não de clip-path. */
 .mhero-inset{
   /* min(96%, 44vh): em telas baixas (SE etc.) limita a ALTURA da imagem
      (altura = largura × 1.25), para a coluna título+imagem+frase+botão caber */
   position:relative;width:min(96%,44vh);aspect-ratio:4/5;
   overflow:hidden;flex:none;
-  /* camada própria + backface hidden: é o que estabiliza a borda arredondada
-     no Safari, que senão pisca ao re-rasterizar o clip-path a cada frame */
-  will-change:clip-path,transform;
+  will-change:transform;
   -webkit-backface-visibility:hidden;backface-visibility:hidden;
-  clip-path:inset(45% 45% 45% 45% round 1000px);
+  transform:translate3d(0,0,0) scale(.1);
 }
 .mhero-media{
   position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;transform:translate3d(0,0,0) scale(.9);
+  object-fit:cover;transform:translate3d(0,0,0) scale(9);
   will-change:transform;
   -webkit-backface-visibility:hidden;backface-visibility:hidden;
 }
@@ -210,11 +214,13 @@ img{display:block}
   /* todas exatamente do mesmo tamanho e quadradas no fim; o arredondamento
      é animado no JS (arco → quadrado arredondado), igual para todas */
   .mhero-inset,.mhero-side{width:min(26vw,44vh);aspect-ratio:1/1}
+  /* as laterais não passam pelo mecanismo de janela: nascem no tamanho final
+     e entram pelo dominó, então não herdam a escala nem a contra-escala */
   .mhero-side{
-    display:block;clip-path:none;opacity:0;
+    display:block;opacity:0;transform:none;
     will-change:transform,opacity;
   }
-  .mhero-side .mhero-media{transform:none}
+  .mhero-side .mhero-media{transform:translate3d(0,0,0) scale(1)}
   .mhero-media{user-select:none;-webkit-user-drag:none}
 
   .mhero-below,.mhero-legal{display:none}
@@ -548,7 +554,8 @@ function initMhero(opts){
   let lastP = 0;
   let baseOffset = 0;       // desloca o trilho para centralizar a imagem do meio
   let loopW = 0;            // largura de um conjunto → passo do loop infinito
-  let lastClip = '';        // evita reescrever o clip-path com o mesmo valor
+  let halfW = 180;          // metade da largura da moldura = raio de "pastilha"
+  let lastRad = -1;         // evita reescrever o border-radius com o mesmo valor
 
   /* em telas de toque o blur animado é caro demais (principalmente no Safari
      do iPhone) e faz a animação engasgar — ali o texto entra só deslizando */
@@ -587,8 +594,10 @@ function initMhero(opts){
     title.style.letterSpacing = prevLs;
     title.style.fontWeight = prevW;
 
-    /* mobile: o "RCS" pequeno desce até a pastilha fechada (o miolo da moldura,
-       clip-path inset de 45%, cujo topo fica a 45% da altura dela).
+    halfW = inset.offsetWidth / 2;
+
+    /* mobile: o "RCS" pequeno desce até a pastilha fechada. Fechada ela ocupa
+       10% da moldura (escala 0.1), então seu topo fica a 45% da altura dela.
        wide: sem subida nem crescimento — o título já nasce no lugar/tamanho. */
     if (RISE) {
       smallFs = 44;
@@ -600,11 +609,15 @@ function initMhero(opts){
       TY = 0;
     }
 
-    /* mobile termina em arco (raio = metade da largura);
-       wide termina em quadrado de cantos arredondados */
-    finalRad = RISE ? inset.offsetWidth / 2 : 24;
+    /* mobile termina em arco (raio = metade da largura), e como o raio de
+       pastilha é esse mesmo valor, o border-radius fica CONSTANTE no mobile:
+       nenhum repaint durante a abertura, só transform.
+       wide termina em quadrado de cantos arredondados. */
+    finalRad = RISE ? halfW : 24;
 
     if (!RISE) {
+      /* laterais já nascem com o canto final */
+      sides.forEach((el) => { el.style.borderRadius = finalRad + 'px'; });
       /* distâncias medidas com o trilho sem transform, para não contaminar */
       const prevTr = track.style.transform;
       track.style.transform = 'none';
@@ -667,16 +680,26 @@ function initMhero(opts){
     });
   }
 
+  /* a abertura inteira é um one-shot: basta começar a rolar que ela roda
+     sozinha no rAF, desacoplada do scroll. No iOS os eventos de scroll chegam
+     irregulares durante a inércia, e prender a animação a eles é justamente o
+     que fazia parecer travada. Voltar ao topo rearma para poder ver de novo. */
   let opened = false;
-  function openTitle(){
-    gsap.killTweensOf([pos, let_]);
+  function openAll(){
+    gsap.killTweensOf([pos, let_, img, dom, blw]);
     gsap.to(pos,  { t: 1, duration: 1.0,  ease: 'power4.out', onUpdate: renderPos });
-    gsap.to(let_, { t: 1, duration: 1.15, delay: 0.12, ease: 'power3.out', onUpdate: renderLetters });
+    gsap.to(let_, { t: 1, duration: 1.15, delay: .12, ease: 'power3.out', onUpdate: renderLetters });
+    gsap.to(img,  { t: 1, duration: 1.1,  delay: .10, ease: 'power3.out', onUpdate: renderImg });
+    if (!RISE)    gsap.to(dom, { t: 1, duration: 1.2, delay: .55, ease: 'power2.out', onUpdate: renderDomino });
+    if (HAS_BELOW) gsap.to(blw, { t: 1, duration: .9, delay: .85, ease: 'power3.out', onUpdate: renderBelow });
   }
-  function closeTitle(){
-    gsap.killTweensOf([pos, let_]);
+  function closeAll(){
+    gsap.killTweensOf([pos, let_, img, dom, blw]);
     gsap.to(pos,  { t: 0, duration: .5,  ease: 'power2.inOut', onUpdate: renderPos });
     gsap.to(let_, { t: 0, duration: .45, ease: 'power2.inOut', onUpdate: renderLetters });
+    gsap.to(img,  { t: 0, duration: .55, ease: 'power2.inOut', onUpdate: renderImg });
+    if (!RISE)    gsap.to(dom, { t: 0, duration: .45, ease: 'power2.inOut', onUpdate: renderDomino });
+    if (HAS_BELOW) gsap.to(blw, { t: 0, duration: .35, ease: 'power2.inOut', onUpdate: renderBelow });
   }
 
   /* ---- galeria arrastável (wide) ----
@@ -692,7 +715,7 @@ function initMhero(opts){
   };
 
   function onPointerDown(e){
-    if (lastP < 0.5) return;            // só depois que a galeria abriu
+    if (!opened) return;                // só depois que a galeria abriu
     dragging = true; lastPointerX = e.clientX; vel = 0;
     gallery.setPointerCapture(e.pointerId);
     gallery.classList.add('dragging');
@@ -717,7 +740,7 @@ function initMhero(opts){
       vel = 0;
       autoX += (0 - autoX) * 0.10;
       if (Math.abs(autoX) < 0.4) autoX = 0;
-    } else if (lastP > 0.5) {
+    } else if (opened) {
       if (dragging) {
         vel *= 0.9;
       } else {
@@ -737,67 +760,70 @@ function initMhero(opts){
     gsap.ticker.add(dragTick);
   }
 
-  /* ---- imagem e conteúdo de baixo: presos ao scroll ---- */
+  /* ---- imagem, dominó e conteúdo de baixo: cada um com seu próprio tempo ---- */
   const tagline = below.querySelector('.mhero-tagline');
   const cta = below.querySelector('.mhero-cta');
 
-  function apply(p){
-    lastP = p;
+  const img = { t: 0 };   // abertura da janela (escala)
+  const dom = { t: 0 };   // dominó das laterais (wide)
+  const blw = { t: 0 };   // frase, botão e copyright (mobile)
 
-    const rp = clamp01(p / 0.72);
-    /* translate3d força camada própria: no Safari o clip-path animado
-       re-rasteriza a cada frame e sem isso a borda arredondada pisca */
-    const sc = Math.round((0.9 + 0.1 * rp) * 1000) / 1000;
-    media.style.transform = `translate3d(0,0,0) scale(${sc})`;
+  /* a moldura cresce de 0.1 até 1 e a foto recebe a escala inversa: o
+     resultado é a foto parada no tamanho real com a janela abrindo em volta.
+     Só transform — nada disso repinta. */
+  function renderImg(){
+    const t = img.t;
+    const s = 0.10 + 0.90 * t;
+    inset.style.transform = `translate3d(0,0,0) scale(${s})`;
+    const zoom = 0.9 + 0.1 * t;              // leve aproximação da foto
+    media.style.transform = `translate3d(0,0,0) scale(${zoom / s})`;
 
-    /* valores quantizados (0,25% e 1px): sem isso cada frame gera uma string
-       diferente e o navegador rasteriza um recorte novo toda vez */
-    const ins = Math.round((45 - 45 * rp) * 4) / 4;
-    const rad = Math.round(1000 - (1000 - finalRad) * rp);
-    const clip = `inset(${ins}% ${ins}% ${ins}% ${ins}% round ${rad}px)`;
-    if (clip !== lastClip) { inset.style.clipPath = clip; lastClip = clip; }
+    /* no mobile finalRad === halfW, então isto resolve para um valor fixo e
+       o border-radius é escrito uma única vez (zero repaint na animação) */
+    const r = Math.round(halfW + (finalRad - halfW) * t);
+    if (r !== lastRad) { inset.style.borderRadius = r + 'px'; lastRad = r; }
+  }
 
-    /* wide: as imagens laterais saem de trás da central e caem em dominó —
-       cada uma salta (hop + overshoot) na sua vez, do centro para as pontas */
-    if (!RISE) {
-      inset.style.borderRadius = rad + 'px';
+  /* wide: as laterais saem de trás da central e caem em dominó — cada uma
+     salta (hop + overshoot) na sua vez, do centro para as pontas */
+  function renderDomino(){
+    const t = dom.t;
+    const STEP = 0.10;                       // defasagem entre as "peças"
+    sides.forEach((el) => {
+      /* duplicatas do loop: entram já no lugar, sem salto */
+      if (el.dataset.dup === '1') {
+        el.style.transform = 'none';
+        el.style.opacity = clamp01(t * 1.6);
+        return;
+      }
+      const rank = parseFloat(el.dataset.rank) || 1;
+      const ti = clamp01((t - (rank - 1) * STEP) / (1 - STEP));
+      const e = backOut(ti);                 // overshoot = o "salto"
+      const dx = parseFloat(el.dataset.dx) || 0;
+      const hop = -26 * Math.sin(Math.PI * ti);
+      el.style.transform =
+        `translate3d(${-dx * (1 - e)}px, ${hop}px, 0) scale(${0.7 + 0.3 * e})`;
+      el.style.opacity = clamp01(ti * 1.6);
+    });
+  }
 
-      const s = clamp01((p - 0.30) / 0.45);
-      const STEP = 0.10;                       // defasagem entre as "peças"
-      sides.forEach((el) => {
-        /* duplicatas do loop: entram já no lugar, sem salto */
-        if (el.dataset.dup === '1') {
-          el.style.transform = 'none';
-          el.style.opacity = clamp01(s * 1.6);
-          el.style.borderRadius = rad + 'px';
-          return;
-        }
-        const rank = parseFloat(el.dataset.rank) || 1;
-        const si = clamp01((s - (rank - 1) * STEP) / (1 - STEP));
-        const e = backOut(si);                 // overshoot = o "salto"
-        const dx = parseFloat(el.dataset.dx) || 0;
-        const hop = -26 * Math.sin(Math.PI * si);
-        el.style.transform =
-          `translate(${-dx * (1 - e)}px, ${hop}px) scale(${0.7 + 0.3 * e})`;
-        el.style.opacity = clamp01(si * 1.6);
-        el.style.borderRadius = rad + 'px';
-      });
-      /* rolou de volta pro alto: a galeria volta ao centro de forma animada
-         (o retorno em si acontece no dragTick) */
-      returning = p < 0.45;
-    }
+  /* mobile: primeiro a frase, depois o botão junto do copyright */
+  function renderBelow(){
+    const t = blw.t;
+    const tp = clamp01(t / 0.55);
+    tagline.style.opacity = tp;
+    tagline.style.transform = `translate3d(0,${16 - 16 * tp}px,0)`;
 
-    /* sequência (só no mobile): primeiro a frase, depois o botão + copyright */
-    if (HAS_BELOW) {
-      const tp = clamp01((p - 0.66) / 0.16);
-      tagline.style.opacity = tp;
-      tagline.style.transform = `translateY(${16 - 16 * tp}px)`;
+    const cp = clamp01((t - 0.45) / 0.55);
+    cta.style.opacity = cp;
+    cta.style.transform = `translate3d(0,${16 - 16 * cp}px,0)`;
+    legal.style.opacity = cp;
+  }
 
-      const cp = clamp01((p - 0.82) / 0.16);
-      cta.style.opacity = cp;
-      cta.style.transform = `translateY(${16 - 16 * cp}px)`;
-      legal.style.opacity = cp;
-    }
+  function renderAll(){
+    renderPos(); renderLetters(); renderImg();
+    if (!RISE) renderDomino();
+    if (HAS_BELOW) renderBelow();
   }
 
   /* ---- entrada automática ao abrir a página ---- */
@@ -806,16 +832,12 @@ function initMhero(opts){
     const t = intro.t;
     title.style.opacity = t;
     title.style.filter = (NO_BLUR || t >= 1) ? 'none' : `blur(${9 * (1 - t)}px)`;
+    /* só opacidade: o transform da moldura agora pertence à abertura da janela */
     inset.style.opacity = t;
-    /* transform livre aqui: o clip-path é quem desenha a pastilha, e o
-       scale da foto mora em .mhero-media — nada colide */
-    inset.style.transform = `translate3d(0,0,0) scale(${0.84 + 0.16 * t})`;
   }
 
   measure();
-  apply(0);
-  renderPos();
-  renderLetters();
+  renderAll();
 
   if (introPlayed) {
     intro.t = 1; renderIntro();
@@ -829,24 +851,22 @@ function initMhero(opts){
 
   /* as larguras só são confiáveis depois que a fonte carrega */
   if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(() => {
-      measure(); apply(lastP); renderPos(); renderLetters(); ScrollTrigger.refresh();
-    });
+    document.fonts.ready.then(() => { measure(); renderAll(); ScrollTrigger.refresh(); });
   }
-  const onResize = () => { measure(); apply(lastP); renderPos(); renderLetters(); };
+  const onResize = () => { measure(); renderAll(); };
   window.addEventListener('resize', onResize);
 
+  /* o ScrollTrigger agora só detecta "começou a rolar" / "voltou ao topo".
+     Não escreve nenhum estilo, então a rolagem em si fica barata. */
   ScrollTrigger.create({
     trigger: mheroEl,
     start: 'top top',
     end: 'bottom bottom',
-    scrub: true,
     onUpdate(self){
-      apply(self.progress);
-      /* a abertura do título não é progressiva: basta começar a rolar que ela
-         roda inteira sozinha; voltar ao topo rearma para poder ver de novo */
-      if (!opened && self.progress > 0.012){ opened = true; openTitle(); }
-      else if (opened && self.progress < 0.004){ opened = false; closeTitle(); }
+      lastP = self.progress;
+      if (!opened && self.progress > 0.012){ opened = true; openAll(); }
+      else if (opened && self.progress < 0.004){ opened = false; closeAll(); }
+      if (!RISE) returning = !opened;
     }
   });
 
