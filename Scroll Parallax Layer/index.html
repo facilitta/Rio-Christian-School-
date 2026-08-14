@@ -153,11 +153,13 @@ img{display:block}
   -webkit-backface-visibility:hidden;backface-visibility:hidden;
   transform:translate3d(0,0,0) scale(.1);
 }
+/* De propósito SEM will-change/backface aqui: promover a foto a camada
+   própria faria o Safari rasterizá-la na escala dela (9×), gerando uma
+   textura gigantesca e estourando a memória no iPhone. Sem promoção, ela é
+   desenhada dentro da camada da moldura, na escala composta (~1×). */
 .mhero-media{
   position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;transform:translate3d(0,0,0) scale(9);
-  will-change:transform;
-  -webkit-backface-visibility:hidden;backface-visibility:hidden;
+  object-fit:cover;transform:scale(9);
 }
 .mhero-side{display:none}
 
@@ -593,6 +595,9 @@ function initMhero(opts){
     title.style.fontSize = prevFs;
     title.style.letterSpacing = prevLs;
     title.style.fontWeight = prevW;
+    /* os caches de "último valor escrito" ficam inválidos após remedir */
+    lastFs = lastLs = lastW = -1;
+    fills.forEach((el) => { delete el.dataset.lastw; });
 
     halfW = inset.offsetWidth / 2;
 
@@ -657,14 +662,25 @@ function initMhero(opts){
   const pos = { t: 0 };   // subida + tamanho + peso
   const let_ = { t: 0 };  // abertura das letras que completam o nome
 
+  /* Medido: font-weight e font-size respondiam por 80% do custo do título
+     (0,27ms cada por frame). Peso é caro porque a fonte é VARIÁVEL — cada
+     valor distinto instancia uma fonte nova e redesenha os glifos. Por isso
+     os valores são quantizados e só escritos quando realmente mudam: o peso
+     passa de ~200 instâncias para 9, e o tamanho de ~200 para ~21.
+     O translateY fica de fora: transform é composto, não custa layout. */
+  let lastFs = -1, lastLs = -1, lastW = -1;
   function renderPos(){
     const t = pos.t;
-    title.style.transform = `translateY(${TY * (1 - t)}px)`;
-    title.style.fontSize = (smallFs + (fullFs - smallFs) * t) + 'px';
-    /* o espaçamento aberto do monograma fecha até o do título,
-       e o peso extra (800) assenta no peso final (600) */
-    title.style.letterSpacing = (START_LS + (END_LS - START_LS) * t) + 'em';
-    title.style.fontWeight = Math.round(START_W + (END_W - START_W) * t);
+    title.style.transform = `translate3d(0,${TY * (1 - t)}px,0)`;
+
+    const fs = Math.round((smallFs + (fullFs - smallFs) * t) * 2) / 2;   // 0,5px
+    if (fs !== lastFs) { title.style.fontSize = fs + 'px'; lastFs = fs; }
+
+    const ls = Math.round((START_LS + (END_LS - START_LS) * t) * 100) / 100; // 0,01em
+    if (ls !== lastLs) { title.style.letterSpacing = ls + 'em'; lastLs = ls; }
+
+    const w = Math.round((START_W + (END_W - START_W) * t) / 25) * 25;   // passo 25
+    if (w !== lastW) { title.style.fontWeight = w; lastW = w; }
   }
 
   function renderLetters(){
@@ -672,10 +688,15 @@ function initMhero(opts){
     fills.forEach((el, i) => {
       /* cascata: "io", depois "hristian", depois "chool" */
       const ti = clamp01((t - i * 0.07) / (1 - 0.14));
-      el.style.width = (parseFloat(el.dataset.w) * ti) + 'em';
+      /* largura também quantizada: é a única aqui que força layout */
+      const w = Math.round(parseFloat(el.dataset.w) * ti * 100) / 100;
+      if (w !== parseFloat(el.dataset.lastw)) {
+        el.style.width = w + 'em';
+        el.dataset.lastw = w;
+      }
       const fi = el.firstElementChild;
       fi.style.opacity = ti;
-      fi.style.transform = `translateX(${-10 * (1 - ti)}px)`;
+      fi.style.transform = `translate3d(${-10 * (1 - ti)}px,0,0)`;
       fi.style.filter = NO_BLUR ? 'none' : `blur(${5 * (1 - ti)}px)`;
     });
   }
@@ -776,7 +797,7 @@ function initMhero(opts){
     const s = 0.10 + 0.90 * t;
     inset.style.transform = `translate3d(0,0,0) scale(${s})`;
     const zoom = 0.9 + 0.1 * t;              // leve aproximação da foto
-    media.style.transform = `translate3d(0,0,0) scale(${zoom / s})`;
+    media.style.transform = `scale(${zoom / s})`;   // sem translate3d: ver CSS
 
     /* no mobile finalRad === halfW, então isto resolve para um valor fixo e
        o border-radius é escrito uma única vez (zero repaint na animação) */
