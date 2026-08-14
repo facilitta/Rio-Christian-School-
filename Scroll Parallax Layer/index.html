@@ -40,7 +40,7 @@ img{display:block}
   /* sombra externa + sombra interna bem leve, só pra diferenciar do fundo */
   box-shadow:0 10px 30px -8px rgba(0,0,0,.25), inset 0 1px 2px rgba(0,0,0,.06), inset 0 0 0 1px rgba(0,0,0,.03);
 }
-.nav-brand{display:flex;align-items:center;gap:10px;color:#141414;text-decoration:none;font-size:.9rem;font-weight:600;letter-spacing:.01em}
+.nav-brand{display:flex;align-items:center;gap:10px;color:#141414;text-decoration:none;font-size:.9rem;font-weight:600;letter-spacing:.01em;font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif}
 .nav-brand .icon-wa{width:22px;height:22px;flex:none}
 .nav-logo img{width:48px;height:48px;display:block}
 
@@ -65,9 +65,9 @@ img{display:block}
   will-change:transform;
 }
 .parallax__title{
-  /* mesma letra usada em "Contate-nos" no footer */
+  /* mesma letra usada no footer */
   font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
-  font-weight:900;
+  font-weight:700;
   font-size:clamp(2rem,8.2vw,9rem);
   line-height:1;letter-spacing:-.03em;
   /* transform (não margin) para deslocar 1:1 sem interferir na centralização flex;
@@ -133,12 +133,13 @@ img{display:block}
   mask-image:linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
 }
 
+/* centralizada atrás do texto (dentro de .footer-main, que já centraliza
+   o heading), bem grande, funcionando como um "fundo" para a escrita */
 .footer-giant-logo{
-  position:absolute;left:50%;bottom:0;
-  width:clamp(200px,20vw,360px);height:auto;
-  /* desce metade da própria altura: fica cortada ao meio pela borda de baixo */
-  transform:translate(-50%,50%);
-  opacity:.1;z-index:0;pointer-events:none;user-select:none;
+  position:absolute;top:50%;left:50%;
+  width:clamp(520px,60vw,920px);height:auto;
+  transform:translate(-50%,-50%);
+  opacity:.14;z-index:0;pointer-events:none;user-select:none;
   -webkit-mask-image:radial-gradient(circle, black 40%, transparent 75%);
   mask-image:radial-gradient(circle, black 40%, transparent 75%);
 }
@@ -167,11 +168,12 @@ img{display:block}
   padding-inline:24px;margin-top:80px;width:100%;max-width:64rem;margin-inline:auto;
 }
 .footer-heading{
-  font-size:clamp(2.5rem,7vw,6rem);font-weight:900;letter-spacing:-.04em;
+  position:relative;z-index:1; /* garante que fique acima da logo-fundo */
+  font-size:clamp(2.5rem,7vw,6rem);font-weight:700;letter-spacing:-.04em;
   text-align:center;margin-bottom:48px;
   color:#fff;
 }
-.footer-links{display:flex;flex-direction:column;align-items:center;gap:24px;width:100%}
+.footer-links{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:24px;width:100%}
 .footer-pills-row{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;width:100%}
 .footer-pill{
   display:inline-flex;align-items:center;gap:12px;
@@ -288,8 +290,6 @@ img{display:block}
     <div class="footer-aurora"></div>
     <div class="footer-grid"></div>
 
-    <img class="footer-giant-logo" src="assets/logo-seal.png" alt="" data-footer-giant>
-
     <div class="footer-marquee-wrap">
       <div class="footer-marquee-track">
         <div class="footer-marquee-item">
@@ -310,7 +310,8 @@ img{display:block}
     </div>
 
     <div class="footer-main">
-      <h2 class="footer-heading" data-footer-reveal>Contate-nos</h2>
+      <img class="footer-giant-logo" src="assets/logo-seal.png" alt="" data-footer-giant>
+      <h2 class="footer-heading" data-footer-reveal>Educar é semear princípios</h2>
 
       <div class="footer-links" data-footer-reveal>
         <div class="footer-pills-row">
@@ -397,15 +398,9 @@ if (footerCurtain) {
      isso cria um espaço preto logo após o hero, e espalha o reveal por um scroll longo,
      terminando bem antes do fim para sobrar uma folga de descanso no final. */
 
-  /* opacidade não entra na animação: fica sempre no valor discreto definido no CSS (marca d'água) */
-  gsap.fromTo(
-    '[data-footer-giant]',
-    { y: '10vh', scale: 0.8 },
-    {
-      y: '0vh', scale: 1, ease: 'power1.out',
-      scrollTrigger: { trigger: footerCurtain, start: '10% top', end: '45% top', scrub: 1 }
-    }
-  );
+  /* a logo-fundo agora fica parada, centralizada via CSS (translate -50%/-50%);
+     animá-la aqui conflitava com essa centralização, pois o GSAP assume
+     controle total do eixo Y ao tocar em "y". */
 
   gsap.fromTo(
     document.querySelectorAll('[data-footer-reveal]'),
