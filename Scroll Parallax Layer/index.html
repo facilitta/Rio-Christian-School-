@@ -81,6 +81,41 @@ img{display:block}
   background:linear-gradient(to top,#0f0f0f,rgba(15,15,15,0));
 }
 
+/* ================= Hero mobile (scroll-reveal, substitui o parallax no mobile) ================= */
+.mhero{display:none}
+@media(max-width:767px){
+  .parallax__header{display:none}
+  .mhero{display:block;position:relative;width:100%;height:220vh}
+}
+.mhero-sticky{
+  position:sticky;top:0;left:0;height:100vh;width:100%;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:22px;padding:32px 24px;
+  background:radial-gradient(45% 45% at 50% 20%, #b91c22 0%, #7a1115 24%, #3d0a0c 48%, #0f0f0f 85%);
+}
+.mhero-copy{text-align:center;opacity:0;will-change:transform,opacity}
+.mhero-title{
+  font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-weight:700;font-size:clamp(2.1rem,9vw,2.8rem);
+  color:#fff;letter-spacing:-.02em;line-height:1.05;
+}
+.mhero-sub{
+  margin-top:12px;font-size:.82rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:rgba(255,255,255,.65);max-width:26ch;margin-inline:auto;
+}
+.mhero-media{
+  display:block;width:88%;max-width:420px;aspect-ratio:16/9;
+  object-fit:cover;transform:scale(.7);
+  will-change:transform,clip-path;
+  clip-path:inset(45% 45% 45% 45% round 1000px);
+}
+.mhero-cta-wrap{opacity:0;will-change:transform,opacity}
+.mhero-cta{
+  display:inline-block;padding:15px 32px;border-radius:999px;
+  background:#fff;color:#141414;font-weight:700;font-size:.9rem;
+  text-decoration:none;box-shadow:0 10px 30px -10px rgba(0,0,0,.5);
+}
+
 /* ---------- content (Osmo) ---------- */
 /* oculta a sessão do ícone Osmo: o scroll deve ser único, sem essa pausa/seção extra */
 .parallax__content{
@@ -276,6 +311,18 @@ img{display:block}
       <div class="parallax__fade"></div>
     </div>
   </section>
+  <section class="mhero" data-mhero>
+    <div class="mhero-sticky">
+      <div class="mhero-copy" data-mhero-copy>
+        <h1 class="mhero-title">Rio Christian School</h1>
+        <p class="mhero-sub">Deliberately Christian · Purposely Academic · Intentionally International</p>
+      </div>
+      <img class="mhero-media" data-mhero-media src="assets/mobile-hero.jpg" alt="Alunos da Rio Christian School">
+      <div class="mhero-cta-wrap" data-mhero-cta>
+        <a class="mhero-cta" href="https://wa.me/5521995557646" target="_blank" rel="noopener">Agende sua visita</a>
+      </div>
+    </div>
+  </section>
   <section class="parallax__content">
     <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 160 160" fill="none" class="osmo-icon-svg">
       <path d="M94.8284 53.8578C92.3086 56.3776 88 54.593 88 51.0294V0H72V59.9999C72 66.6273 66.6274 71.9999 60 71.9999H0V87.9999H51.0294C54.5931 87.9999 56.3777 92.3085 53.8579 94.8283L18.3431 130.343L29.6569 141.657L65.1717 106.142C67.684 103.63 71.9745 105.396 72 108.939V160L88.0001 160L88 99.9999C88 93.3725 93.3726 87.9999 100 87.9999H160V71.9999H108.939C105.407 71.9745 103.64 67.7091 106.12 65.1938L106.142 65.1716L141.657 29.6568L130.343 18.3432L94.8284 53.8578Z" fill="currentColor"></path>
@@ -354,9 +401,13 @@ img{display:block}
 <script>
 gsap.registerPlugin(ScrollTrigger);
 
-const triggerElement = document.querySelector('[data-parallax-layers]');
+const mm = gsap.matchMedia();
 
-if (triggerElement) {
+/* desktop/tablet: parallax de scroll original (foto do refeitório + alunos) */
+mm.add("(min-width: 768px)", () => {
+  const triggerElement = document.querySelector('[data-parallax-layers]');
+  if (!triggerElement) return;
+
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: triggerElement,
@@ -383,7 +434,55 @@ if (triggerElement) {
       idx === 0 ? undefined : "<"
     );
   });
+});
+
+/* mobile: hero com reveal de imagem no scroll (clip-path + scale),
+   porta manual do padrão "ContainerScroll/ContainerInset/HeroVideo" pra vanilla JS */
+mm.add("(max-width: 767px)", () => {
+  const mheroEl = document.querySelector('[data-mhero]');
+  if (!mheroEl) return;
+
+  const media = document.querySelector('[data-mhero-media]');
+  const copy = document.querySelector('[data-mhero-copy]');
+  const ctaWrap = document.querySelector('[data-mhero-cta]');
+
+  ScrollTrigger.create({
+    trigger: mheroEl,
+    start: 'top top',
+    end: 'bottom bottom',
+    scrub: true,
+    onUpdate(self){
+      const p = self.progress;
+
+      /* imagem: escala 0.7→1 e clip-path (pill → retângulo), 0→80% do scroll */
+      const revealP = Math.min(p / 0.8, 1);
+      const scale = 0.7 + 0.3 * revealP;
+      const inset = 45 - 45 * revealP;
+      const rounded = 1000 - (1000 - 16) * p;
+      media.style.transform = `scale(${scale})`;
+      media.style.clipPath = `inset(${inset}% ${inset}% ${inset}% ${inset}% round ${rounded}px)`;
+
+      /* título/subtítulo: fade+slide, 20%→80% do scroll */
+      const copyP = Math.max(0, Math.min((p - 0.2) / 0.6, 1));
+      copy.style.opacity = copyP;
+      copy.style.transform = `translateY(${80 - 80 * copyP}px)`;
+
+      /* botão: fade+slide, 0→70% do scroll */
+      const ctaP = Math.max(0, Math.min(p / 0.7, 1));
+      ctaWrap.style.opacity = ctaP;
+      ctaWrap.style.transform = `translateY(${-120 + 120 * ctaP}px)`;
+    }
+  });
+});
+
+/* a imagem do hero mobile carrega de forma assíncrona; se o layout mudar
+   depois que o ScrollTrigger já calculou start/end, os valores ficam
+   desatualizados — força um refresh assim que ela (e a página toda) carregar */
+const mheroMediaImg = document.querySelector('[data-mhero-media]');
+if (mheroMediaImg && !mheroMediaImg.complete) {
+  mheroMediaImg.addEventListener('load', () => ScrollTrigger.refresh());
 }
+window.addEventListener('load', () => ScrollTrigger.refresh());
 
 const lenis = new Lenis();
 lenis.on('scroll', ScrollTrigger.update);
