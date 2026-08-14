@@ -31,17 +31,18 @@ img{display:block}
 }
 .nav-pill{
   pointer-events:auto;
-  width:100%;max-width:1180px;
+  width:100%;max-width:1180px;min-height:78px;
   display:flex;align-items:center;justify-content:space-between;
-  gap:16px;padding:10px 14px 10px 18px;
+  gap:16px;padding:14px 18px;
   border-radius:999px;
   background:rgba(255,255,255,.92);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  box-shadow:0 10px 30px -8px rgba(0,0,0,.25);
+  /* sombra externa + sombra interna bem leve, só pra diferenciar do fundo */
+  box-shadow:0 10px 30px -8px rgba(0,0,0,.25), inset 0 1px 2px rgba(0,0,0,.06), inset 0 0 0 1px rgba(0,0,0,.03);
 }
 .nav-brand{display:flex;align-items:center;gap:10px;color:#141414;text-decoration:none;font-size:.9rem;font-weight:600;letter-spacing:.01em}
 .nav-brand .icon-wa{width:22px;height:22px;flex:none}
-.nav-logo img{width:30px;height:30px;display:block}
+.nav-logo img{width:48px;height:48px;display:block}
 
 /* ---------- parallax (Osmo) ---------- */
 .parallax{position:relative}

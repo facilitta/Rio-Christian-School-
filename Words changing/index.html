@@ -43,16 +43,17 @@ body{
 }
 .nav-pill{
   pointer-events:auto;
-  width:100%;max-width:1180px;min-height:64px;
+  width:100%;max-width:1180px;min-height:78px;
   display:flex;align-items:center;justify-content:space-between;
-  gap:16px;padding:10px 18px;
-  border-radius:22px; /* mais "quadradinha", cantos arredondados sem virar pílula */
+  gap:16px;padding:14px 18px;
+  border-radius:24px; /* mais "quadradinha", cantos arredondados sem virar pílula */
   background:#F3F4F6;
-  box-shadow:0 10px 30px -12px rgba(0,0,0,.15);
+  /* sombra externa + sombra interna bem leve, só pra diferenciar do fundo */
+  box-shadow:0 10px 30px -12px rgba(0,0,0,.15), inset 0 1px 2px rgba(0,0,0,.05), inset 0 0 0 1px rgba(0,0,0,.03);
 }
 .nav-brand{display:flex;align-items:center;gap:10px;color:#1E2220;text-decoration:none;font-size:.9rem;font-weight:600;letter-spacing:.01em}
 .nav-brand .icon-wa{width:22px;height:22px;flex:none}
-.nav-logo img{width:30px;height:30px;display:block}
+.nav-logo img{width:48px;height:48px;display:block}
 
 /* w-full */
 .w-full{width:100%}
@@ -87,7 +88,7 @@ body{
   white-space:nowrap;border-radius:calc(var(--radius) - 2px);
   font-size:.875rem;line-height:1.25rem;font-weight:500;
   transition:background-color .15s ease,color .15s ease;
-  cursor:pointer;border:none;font-family:inherit;
+  cursor:pointer;border:none;font-family:inherit;text-decoration:none;
 }
 .btn:focus-visible{outline:none;box-shadow:0 0 0 2px hsl(var(--background)),0 0 0 4px hsl(var(--foreground))}
 .btn:disabled{pointer-events:none;opacity:.5}
@@ -222,12 +223,12 @@ body{
         </div>
 
         <div class="cta-row">
-          <button class="btn btn-default size-lg">
+          <a href="https://wa.me/5521995557646" target="_blank" rel="noopener" class="btn btn-default size-lg">
             Agende sua Visita
-          </button>
-          <button class="btn btn-secondary size-lg">
+          </a>
+          <a href="https://recreiochristianschool.com" class="btn btn-secondary size-lg">
             Saiba Mais
-          </button>
+          </a>
         </div>
 
         <!-- carrossel logo abaixo dos botões, na mesma tela -->
