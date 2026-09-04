@@ -33,7 +33,23 @@ var origem = (new URLSearchParams(location.search).get('o') || 'desconhecido')
    página de passagem, e contá-la infla a métrica de visitas das landing pages. */
 fbq('track', 'Contact', { content_name: 'WhatsApp', content_category: origem });
 
-var destino = 'https://wa.me/5521995557646';
+/* Codigo da publicacao que trouxe a familia ate aqui. Chega pela URL do
+   anuncio (?ref=RCS0001) e fica guardado no sessionStorage pela landing,
+   sobrevivendo a navegacao entre paginas do site.
+   Vai anexado a mensagem pre-preenchida como [RCS0001]; o Porteiro, no n8n,
+   le esse marcador, grava em origem_ad_id e o REMOVE antes de a Enir ver. */
+var ref = '';
+try {
+  var daUrl = new URLSearchParams(location.search).get('ref') || '';
+  var daSessao = sessionStorage.getItem('rcs_ref') || '';
+  var bruto = daUrl || daSessao;
+  if (/^RCS\d{4}$/i.test(bruto)) ref = bruto.toUpperCase();
+} catch (e) {}
+
+var texto = 'Ola! Gostaria de saber mais sobre a Rio Christian School.';
+if (ref) texto += ' [' + ref + ']';
+
+var destino = 'https://wa.me/5521995557646?text=' + encodeURIComponent(texto);
 
 /* Espera curta antes de sair, para a requisição do Pixel completar. Era esse o
    ponto do problema original: indo direto para o app, o navegador cancelava a
