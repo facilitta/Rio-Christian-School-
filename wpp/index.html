@@ -9,29 +9,11 @@
 <!-- não indexar: é uma página de passagem, não conteúdo -->
 <meta name="robots" content="noindex,nofollow">
 
-<!-- Meta Pixel Code — Rio Christian School — Pixel "INSCRIÇÃO" (1230419411417568) -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1230419411417568');
-</script>
-<!-- End Meta Pixel Code -->
-
 <script>
 /* De onde veio o clique (?o=flutuante, ?o=menu, ...), para saber depois
    qual botão converte mais. Sanitizado: só letras, números, hífen. */
 var origem = (new URLSearchParams(location.search).get('o') || 'desconhecido')
              .replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
-
-/* O evento de conversão. Aqui NÃO disparamos PageView de propósito: esta é uma
-   página de passagem, e contá-la infla a métrica de visitas das landing pages. */
-fbq('track', 'Contact', { content_name: 'WhatsApp', content_category: origem });
 
 /* Codigo da publicacao que trouxe a familia ate aqui. Chega pela URL do
    anuncio (?ref=RCS0001) e fica guardado no sessionStorage pela landing,
@@ -58,9 +40,6 @@ var destino = 'https://wa.me/5521995557646?text=' + encodeURIComponent(texto);
 setTimeout(function(){ location.replace(destino); }, 900);
 </script>
 <noscript>
-  <!-- sem JavaScript: o Pixel vai pela imagem e o redirecionamento pelo meta -->
-  <img height="1" width="1" style="display:none"
-  src="https://www.facebook.com/tr?id=1230419411417568&ev=Contact&noscript=1"/>
   <meta http-equiv="refresh" content="0;url=https://wa.me/5521995557646">
 </noscript>
 
