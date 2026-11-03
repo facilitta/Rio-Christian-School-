@@ -2,3 +2,14 @@
 **/.DS_Store
 *.zip
 .claude/settings.local.json
+
+# segredos nunca sobem (A-10, LN-24 passo 1 / G-05)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
